@@ -3,453 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClassFlow Pro | المنصة الذكية لإدارة جداول ودخل المعلمين</title>
-    <!-- Tailwind CSS CDN -->
+    <title>مساعد الحصة السريع - Classroom</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts (Cairo) -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- html2canvas for Exporting Images -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <style>
-        body { font-family: 'Cairo', sans-serif; background: #0f172a; color: #f8fafc; }
-        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .glass-card { background: rgba(51, 65, 85, 0.5); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .modal-active { display: flex !important; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-    </style>
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style> body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; } </style>
 </head>
-<body class="min-h-screen pb-12 flex flex-col justify-between">
-
-    <!-- Modal: Onboarding Wizard -->
-    <div id="onboardingModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden justify-center items-center p-4">
-        <div class="glass-panel rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl space-y-6">
-            <div class="text-center">
-                <div class="inline-block bg-indigo-600/20 text-indigo-400 p-3 rounded-2xl text-3xl mb-2">👨‍🏫</div>
-                <h2 class="text-2xl font-black text-white">مرحباً بك في ClassFlow Pro</h2>
-                <p class="text-xs text-slate-400 mt-1">خصص نظامك الخاص مرة واحدة. جميع بياناتك تحفظ بآمان على هاتفك فقط!</p>
-            </div>
-
-            <form id="onboardingForm" onsubmit="saveTeacherProfile(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1.5">الاسم واللقب (الذي يظهر في أعلى الجدول)</label>
-                    <input type="text" id="profName" required placeholder="مثال: أ/ إياد عمّار" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-indigo-500">
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-300 mb-1.5">المادة الأساسية</label>
-                        <input type="text" id="profSubject" required placeholder="مثال: الفيزياء" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-300 mb-1.5">سعر الحصة الافتراضي (ج.م)</label>
-                        <input type="number" id="profDefaultPrice" value="60" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-indigo-500">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1.5">أماكن التدريس / السناتر (يفصل بينها بفصلة ,)</label>
-                    <input type="text" id="profLocations" required placeholder="سنتر الأمل, سنتر التفوق, درس خاص, أونلاين" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-indigo-500">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1.5">مجموعات الطلاب (يفصل بينها بفصلة ,)</label>
-                    <input type="text" id="profGroups" required placeholder="مجموعة أ, مجموعة ب, المتفوقين, بنين, بنات" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-indigo-500">
-                </div>
-
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black py-3.5 rounded-xl shadow-lg transition text-sm">
-                    🚀 حفظ وابدأ تنظيم جدولك
-                </button>
-            </form>
-        </div>
-    </div>
+<body class="pb-24">
 
     <!-- Header -->
-    <header class="glass-panel border-b border-slate-800 py-4 px-6 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 text-white font-black p-2.5 rounded-2xl text-xl shadow-lg shadow-indigo-500/30">⚡</div>
-                <div>
-                    <h1 id="welcomeText" class="text-lg md:text-xl font-black text-white">ClassFlow Pro</h1>
-                    <p class="text-indigo-300 text-[11px]">منصة التخطيط والدخل المالي المتقدمة للمعلم</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-2">
-                <button onclick="editProfile()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-3.5 py-2.5 rounded-xl transition border border-slate-700">
-                    ⚙️ تعديل الملف
-                </button>
-                <button onclick="exportToImage()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-lg shadow-emerald-600/20">
-                    📸 تصدير الجدول (PNG)
-                </button>
-            </div>
+    <header class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-50 flex justify-between items-center">
+        <div>
+            <h1 class="font-black text-lg">⚡ مساعد الحصة (Classroom 🌐)</h1>
+            <p class="text-[11px] text-indigo-200">مربوط بالكامل مع Supabase Cloud</p>
+        </div>
+        <div class="text-left bg-indigo-700 px-3 py-1 rounded-xl">
+            <span class="text-[10px] text-indigo-200 block">حصيلة اليوم</span>
+            <span id="todayTotal" class="font-black text-emerald-300 text-sm">0 ج.م</span>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- Navigation Tabs -->
+    <div class="flex border-b bg-white text-xs font-bold text-center">
+        <button onclick="switchTab('session')" id="tabSession" class="flex-1 py-3 text-indigo-600 border-b-2 border-indigo-600">📖 الحصة الحالية</button>
+        <button onclick="switchTab('students')" id="tabStudents" class="flex-1 py-3 text-slate-500">👥 إدارة الطلاب</button>
+    </div>
 
-        <!-- Sidebar: Form Controls -->
-        <section class="lg:col-span-5 space-y-6">
-            <div class="glass-panel p-6 rounded-3xl space-y-5">
-                <div class="flex justify-between items-center border-b border-slate-700/60 pb-3">
-                    <h2 class="text-sm font-black text-white flex items-center gap-2">
-                        ➕ إدراج حصة جديدة
-                    </h2>
-                    <span class="text-[10px] bg-indigo-500/20 text-indigo-300 font-bold px-2.5 py-0.5 rounded-full border border-indigo-500/30">سريع بدون كتابة</span>
-                </div>
+    <!-- MAIN CONTAINER -->
+    <main class="p-4 max-w-lg mx-auto">
 
-                <form id="sessionForm" onsubmit="addSession(event)" class="space-y-3.5">
-                    
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-400 mb-1">المرحلة الدراسية</label>
-                        <select id="grade" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 outline-none focus:border-indigo-500">
-                            <option value="الصف الأول الثانوي">الصف الأول الثانوي</option>
-                            <option value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
-                            <option value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
-                            <option value="الصف الأول الإعدادي">الصف الأول الإعدادي</option>
-                            <option value="الصف الثاني الإعدادي">الصف الثاني الإعدادي</option>
-                            <option value="الصف الثالث الإعدادي">الصف الثالث الإعدادي</option>
-                        </select>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1">اليوم</label>
-                            <select id="day" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 outline-none focus:border-indigo-500">
-                                <option value="السبت">السبت</option>
-                                <option value="الأحد">الأحد</option>
-                                <option value="الإثنين">الإثنين</option>
-                                <option value="الثلاثاء">الثلاثاء</option>
-                                <option value="الأربعاء">الأربعاء</option>
-                                <option value="الخميس">الخميس</option>
-                                <option value="الجمعة">الجمعة</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1">المكان / السنتر</label>
-                            <select id="locationSelect" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 outline-none focus:border-indigo-500"></select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1">المجموعة</label>
-                            <select id="groupSelect" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 outline-none focus:border-indigo-500"></select>
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1">تجهيز الحصة</label>
-                            <select id="task" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 outline-none focus:border-indigo-500">
-                                <option value="شرح درس جديد">شرح جديد</option>
-                                <option value="حل شيت واجب">واجب وسيشن حل</option>
-                                <option value="امتحان جزئي">امتحان جزئي</option>
-                                <option value="مراجعة شاملة">مراجعة شاملة</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1">من (البداية)</label>
-                            <select id="startTime" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 outline-none">
-                                <option value="08:00">08:00 ص</option>
-                                <option value="09:00">09:00 ص</option>
-                                <option value="10:00" selected>10:00 ص</option>
-                                <option value="11:00">11:00 ص</option>
-                                <option value="12:00">12:00 ظ</option>
-                                <option value="13:00">01:00 ظ</option>
-                                <option value="14:00">02:00 ظ</option>
-                                <option value="15:00">03:00 ع</option>
-                                <option value="16:00">04:00 ع</option>
-                                <option value="17:00">05:00 م</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-400 mb-1">إلى (النهاية)</label>
-                            <select id="endTime" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 outline-none">
-                                <option value="10:00">10:00 ص</option>
-                                <option value="11:30">11:30 ص</option>
-                                <option value="12:00" selected>12:00 ظ</option>
-                                <option value="13:30">01:30 ظ</option>
-                                <option value="15:00">03:00 ع</option>
-                                <option value="17:00">05:00 م</option>
-                                <option value="19:00">07:00 م</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3 bg-indigo-950/40 p-3 rounded-2xl border border-indigo-800/40">
-                        <div>
-                            <label class="block text-[10px] font-bold text-indigo-300 mb-1">الطلاب المتوقعين</label>
-                            <input type="number" id="studentCount" value="20" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs font-bold text-center text-white outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-indigo-300 mb-1">سعر الحصة (ج.م)</label>
-                            <input type="number" id="pricePerStudent" value="60" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs font-bold text-center text-white outline-none">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-3 rounded-xl text-xs transition shadow-lg shadow-indigo-600/30">
-                        📌 إضافة الحصة للجدول
-                    </button>
-                </form>
+        <!-- TAB 1: SESSION MODE -->
+        <section id="secSession" class="space-y-4">
+            <div class="bg-white p-3 rounded-2xl shadow-sm border space-y-2">
+                <label class="block text-xs font-bold text-slate-600">اختر المجموعة:</label>
+                <select id="sessionGroupSelect" onchange="renderSessionList()" class="w-full bg-slate-50 border rounded-xl p-2.5 text-xs font-bold text-slate-800 outline-none"></select>
             </div>
 
-            <!-- Finance & Analytics Card -->
-            <div class="glass-panel p-5 rounded-3xl space-y-3">
-                <span class="text-[11px] text-slate-400 font-bold block">📊 ملخص الأسبوع المالي:</span>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-emerald-950/40 border border-emerald-800/40 p-3.5 rounded-2xl">
-                        <span class="text-[10px] font-bold text-emerald-400 block">الإيراد المتوقع</span>
-                        <span id="weeklyIncome" class="text-xl font-black text-emerald-300">0 ج.م</span>
-                    </div>
-                    <div class="bg-indigo-950/40 border border-indigo-800/40 p-3.5 rounded-2xl">
-                        <span class="text-[10px] font-bold text-indigo-400 block">إجمالي الحصص</span>
-                        <span id="totalSessions" class="text-xl font-black text-indigo-300">0 حصة</span>
-                    </div>
+            <!-- Stats Bar -->
+            <div class="grid grid-cols-3 gap-2 text-center text-xs font-bold">
+                <div class="bg-emerald-50 text-emerald-700 border border-emerald-200 p-2 rounded-xl">
+                    <span class="block text-[10px] text-slate-500">حضر</span>
+                    <span id="countPresent" class="text-sm font-black">0</span>
+                </div>
+                <div class="bg-red-50 text-red-700 border border-red-200 p-2 rounded-xl">
+                    <span class="block text-[10px] text-slate-500">غاب</span>
+                    <span id="countAbsent" class="text-sm font-black">0</span>
+                </div>
+                <div class="bg-amber-50 text-amber-700 border border-amber-200 p-2 rounded-xl">
+                    <span class="block text-[10px] text-slate-500">لم يدفع</span>
+                    <span id="countUnpaid" class="text-sm font-black">0</span>
                 </div>
             </div>
 
-            <!-- Warnings Container -->
-            <div id="suggestionsBox" class="space-y-2 text-xs"></div>
+            <div id="sessionStudentsList" class="space-y-3">
+                <p class="text-center text-xs text-slate-400 py-6">جاري تحميل البيانات من قاعدة البيانات...</p>
+            </div>
         </section>
 
-        <!-- Main Schedule Board -->
-        <section class="lg:col-span-7">
-            <div id="schedulePaper" class="glass-panel p-6 rounded-3xl space-y-5">
-                <div class="flex justify-between items-center border-b border-slate-700/60 pb-4">
-                    <div>
-                        <h2 id="teacherHeader" class="text-lg font-black text-white">جدول الحصص</h2>
-                        <p class="text-xs text-slate-400 mt-0.5">جدول منظم ومحسوب تلقائياً</p>
-                    </div>
-                    <button onclick="clearAll()" class="text-xs text-red-400 font-bold hover:underline">إعادة ضبط</button>
+        <!-- TAB 2: STUDENTS MANAGEMENT -->
+        <section id="secStudents" class="space-y-4 hidden">
+            <form onsubmit="addStudent(event)" class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
+                <h3 class="font-black text-xs text-slate-800">➕ إضافة طالب جديد</h3>
+                <input type="text" id="stdName" placeholder="اسم الطالب" required class="w-full border rounded-xl p-2.5 text-xs font-bold bg-slate-50 outline-none">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="tel" id="stdPhone" placeholder="رقم ولي الأمر (واتساب)" required class="w-full border rounded-xl p-2.5 text-xs font-bold bg-slate-50 outline-none">
+                    <input type="number" id="stdFee" placeholder="المبلغ (ج.م)" value="60" required class="w-full border rounded-xl p-2.5 text-xs font-bold bg-slate-50 outline-none">
                 </div>
+                <input type="text" id="stdGroup" placeholder="المجموعة (مثال: ثانوية - سنتر الأمل)" required class="w-full border rounded-xl p-2.5 text-xs font-bold bg-slate-50 outline-none">
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs transition">حفظ في قاعدة البيانات ☁️</button>
+            </form>
 
-                <div id="scheduleGrid" class="space-y-4"></div>
-            </div>
+            <div id="allStudentsList" class="space-y-2"></div>
         </section>
 
     </main>
 
-    <!-- Footer -->
-    <footer class="mt-12 text-center text-xs text-slate-500 py-4 border-t border-slate-800/60">
-        ClassFlow Pro • منصة المعلم الذكية لإدارة المواقيت والدخل
-    </footer>
-
     <script>
-        const days = ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
-        let profile = JSON.parse(localStorage.getItem('cf_pro_profile')) || null;
-        let sessions = JSON.parse(localStorage.getItem('cf_pro_sessions')) || [];
+        // 🔗 بيانات مشروعك الخاصة بـ Supabase
+        const SUPABASE_URL = "https://wboqplduhcwkpgffaqrh.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_6ZO3naWz7EAT5faaFP45VQ_MdgF9L94";
 
-        function checkOnboarding() {
-            if (!profile) {
-                document.getElementById('onboardingModal').classList.add('modal-active');
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let students = [];
+        let todayData = {};
+        const todayDate = new Date().toISOString().split('T')[0];
+
+        async function loadData() {
+            try {
+                // 1. جلب الطلاب
+                const { data: stdData, error: stdErr } = await _supabase.from('students').select('*');
+                if (stdErr) throw stdErr;
+                students = stdData || [];
+
+                // 2. جلب سجل الحضور لليوم
+                const { data: attData, error: attErr } = await _supabase.from('attendance').select('*').eq('date', todayDate);
+                if (attErr) throw attErr;
+                
+                todayData = {};
+                (attData || []).forEach(row => {
+                    todayData[row.student_id] = row;
+                });
+
+                updateGroupsDropdown();
+                renderAll();
+            } catch (err) {
+                console.error("خطأ في جلب البيانات:", err);
+            }
+        }
+
+        async function addStudent(e) {
+            e.preventDefault();
+            const newStudent = {
+                name: document.getElementById('stdName').value,
+                phone: document.getElementById('stdPhone').value.replace(/[^0-9]/g, ''),
+                group: document.getElementById('stdGroup').value,
+                fee: Number(document.getElementById('stdFee').value) || 0
+            };
+
+            const { error } = await _supabase.from('students').insert([newStudent]);
+            if(error) {
+                alert('حدث خطأ أثناء الحفظ! تأكد من أنك قمت بإنشاء الجداول في SQL Editor في لوحة Supabase.');
+                console.error(error);
+                return;
+            }
+
+            e.target.reset();
+            alert('تم حفظ الطالب أونلاين بنجاح!');
+            loadData();
+        }
+
+        async function deleteStudent(id) {
+            if(confirm('هل تريد مسح الطالب؟')) {
+                await _supabase.from('students').delete().eq('id', id);
+                loadData();
+            }
+        }
+
+        async function toggleAttendance(studentId, status) {
+            const current = todayData[studentId] || { student_id: studentId, status: null, paid: false, date: todayDate };
+            current.status = status;
+            
+            await _supabase.from('attendance').upsert([current], { onConflict: 'student_id,date' });
+            loadData();
+        }
+
+        async function togglePaid(studentId) {
+            const current = todayData[studentId] || { student_id: studentId, status: null, paid: false, date: todayDate };
+            current.paid = !current.paid;
+
+            await _supabase.from('attendance').upsert([current], { onConflict: 'student_id,date' });
+            loadData();
+        }
+
+        function switchTab(tab) {
+            document.getElementById('secSession').classList.toggle('hidden', tab !== 'session');
+            document.getElementById('secStudents').classList.toggle('hidden', tab !== 'students');
+            document.getElementById('tabSession').className = tab === 'session' ? 'flex-1 py-3 text-indigo-600 border-b-2 border-indigo-600' : 'flex-1 py-3 text-slate-500';
+            document.getElementById('tabStudents').className = tab === 'students' ? 'flex-1 py-3 text-indigo-600 border-b-2 border-indigo-600' : 'flex-1 py-3 text-slate-500';
+        }
+
+        function updateGroupsDropdown() {
+            const groups = [...new Set(students.map(s => s.group))];
+            const select = document.getElementById('sessionGroupSelect');
+            if(groups.length === 0) {
+                select.innerHTML = '<option>لا توجد مجموعات حالياً</option>';
             } else {
-                document.getElementById('onboardingModal').classList.remove('modal-active');
-                setupProfileUI();
+                select.innerHTML = groups.map(g => `<option value="${g}">${g}</option>`).join('');
             }
         }
 
-        function saveTeacherProfile(e) {
-            e.preventDefault();
-            profile = {
-                name: document.getElementById('profName').value,
-                subject: document.getElementById('profSubject').value,
-                defaultPrice: Number(document.getElementById('profDefaultPrice').value) || 60,
-                locations: document.getElementById('profLocations').value.split(',').map(s => s.trim()).filter(Boolean),
-                groups: document.getElementById('profGroups').value.split(',').map(s => s.trim()).filter(Boolean)
-            };
-            localStorage.setItem('cf_pro_profile', JSON.stringify(profile));
-            checkOnboarding();
-            saveAndRender();
+        function sendWhatsApp(phone, studentName, type) {
+            let msg = type === 'absent' ? 
+                `السلام عليكم ولي أمر الطالب/ة (${studentName})، نحيطكم علماً بغيابه اليوم عن الحصة.` :
+                `السلام عليكم ولي أمر الطالب/ة (${studentName})، نود تذكيركم بالمستحقات المتبقية للحصة.`;
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
-        function editProfile() {
-            if(!profile) return;
-            document.getElementById('profName').value = profile.name;
-            document.getElementById('profSubject').value = profile.subject;
-            document.getElementById('profDefaultPrice').value = profile.defaultPrice;
-            document.getElementById('profLocations').value = profile.locations.join(', ');
-            document.getElementById('profGroups').value = profile.groups.join(', ');
-            document.getElementById('onboardingModal').classList.add('modal-active');
-        }
-
-        function setupProfileUI() {
-            document.getElementById('welcomeText').innerText = `جدول ${profile.name} (${profile.subject})`;
-            document.getElementById('teacherHeader').innerText = `جدول أسبوع التدريس - ${profile.name}`;
-            document.getElementById('pricePerStudent').value = profile.defaultPrice;
-
-            document.getElementById('locationSelect').innerHTML = profile.locations.map(l => `<option value="${l}">${l}</option>`).join('');
-            document.getElementById('groupSelect').innerHTML = profile.groups.map(g => `<option value="${g}">${g}</option>`).join('');
-        }
-
-        function saveAndRender() {
-            localStorage.setItem('cf_pro_sessions', JSON.stringify(sessions));
-            renderSchedule();
-            calculateIncome();
-            analyzeAndSuggest();
-        }
-
-        function addSession(e) {
-            e.preventDefault();
-            const newSession = {
-                id: Date.now(),
-                subject: profile ? profile.subject : "مادة",
-                grade: document.getElementById('grade').value,
-                day: document.getElementById('day').value,
-                location: document.getElementById('locationSelect').value,
-                group: document.getElementById('groupSelect').value,
-                startTime: document.getElementById('startTime').value,
-                endTime: document.getElementById('endTime').value,
-                task: document.getElementById('task').value,
-                studentCount: Number(document.getElementById('studentCount').value) || 0,
-                pricePerStudent: Number(document.getElementById('pricePerStudent').value) || 0
-            };
-
-            sessions.push(newSession);
-            saveAndRender();
-        }
-
-        function deleteSession(id) {
-            sessions = sessions.filter(s => s.id !== id);
-            saveAndRender();
-        }
-
-        function clearAll() {
-            if(confirm('هل تريد إعادة ضبط الجدول ومسح الحصص؟')) {
-                sessions = [];
-                saveAndRender();
-            }
-        }
-
-        function calculateIncome() {
-            let totalIncome = 0;
-            sessions.forEach(s => totalIncome += (s.studentCount * s.pricePerStudent));
-            document.getElementById('weeklyIncome').innerText = totalIncome.toLocaleString('ar-EG') + ' ج.م';
-            document.getElementById('totalSessions').innerText = sessions.length + ' حصة';
-        }
-
-        function printAttendanceSheet(grade, location, group) {
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html dir="rtl">
-                <head>
-                    <title>كشف حضور - ${grade}</title>
-                    <style>
-                        body { font-family: sans-serif; padding: 20px; }
-                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                        th, td { border: 1px solid #000; padding: 8px; text-align: center; font-size: 12px; }
-                        th { background: #f2f2f2; }
-                    </style>
-                </head>
-                <body>
-                    <h2>كشف حضور وغياب الطلاب - ClassFlow</h2>
-                    <p><strong>المعلم:</strong> ${profile ? profile.name : ''} | <strong>المادة:</strong> ${profile ? profile.subject : ''}</p>
-                    <p><strong>الصف:</strong> ${grade} | <strong>المكان:</strong> ${location} | <strong>المجموعة:</strong> ${group}</p>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>اسم الطالب</th>
-                                <th>رقم الهاتف</th>
-                                <th>الدفعة (مصاريف)</th>
-                                <th>الغياب</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${Array.from({length: 15}).map((_, i) => `<tr><td>${i+1}</td><td></td><td></td><td></td><td></td></tr>`).join('')}
-                        </tbody>
-                    </table>
-                    <script>window.print();<\/script>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-        }
-
-        function renderSchedule() {
-            const container = document.getElementById('scheduleGrid');
+        function renderSessionList() {
+            const selectedGroup = document.getElementById('sessionGroupSelect').value;
+            const groupStudents = students.filter(s => s.group === selectedGroup);
+            const container = document.getElementById('sessionStudentsList');
             container.innerHTML = '';
 
-            days.forEach(day => {
-                const daySessions = sessions.filter(s => s.day === day).sort((a, b) => a.startTime.localeCompare(b.startTime));
+            if (groupStudents.length === 0) {
+                container.innerHTML = `<p class="text-center text-xs text-slate-400 py-6">لا يوجد طلاب في هذه المجموعة</p>`;
+                return;
+            }
 
-                if (daySessions.length > 0) {
-                    let dayHtml = `
-                        <div class="glass-card rounded-2xl overflow-hidden border border-slate-700/50">
-                            <div class="bg-slate-800/80 px-4 py-2 font-bold text-xs text-slate-200 flex justify-between items-center border-b border-slate-700/50">
-                                <span>📅 ${day}</span>
-                                <span class="bg-indigo-600 text-white px-2.5 py-0.5 rounded-full font-bold text-[10px]">${daySessions.length} حصص</span>
+            let presentCount = 0, absentCount = 0, unpaidCount = 0, totalCash = 0;
+
+            groupStudents.forEach(s => {
+                const state = todayData[s.id] || { status: null, paid: false };
+                if(state.status === 'present') presentCount++;
+                if(state.status === 'absent') absentCount++;
+                if(state.paid) totalCash += s.fee;
+                if(!state.paid && state.status === 'present') unpaidCount++;
+
+                container.innerHTML += `
+                    <div class="bg-white border rounded-2xl p-3 shadow-sm flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-xs text-slate-800">${s.name}</h4>
+                                <span class="text-[10px] text-slate-400">💰 ${s.fee} ج.م</span>
                             </div>
-                            <div class="p-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-                    `;
-
-                    daySessions.forEach(s => {
-                        dayHtml += `
-                            <div class="bg-slate-900/80 border border-slate-700/60 rounded-xl p-3.5 space-y-2 relative">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <h4 class="font-extrabold text-sm text-indigo-200">${s.grade}</h4>
-                                        <p class="text-[11px] text-slate-400 font-semibold mt-0.5">📍 ${s.location} • 👥 ${s.group}</p>
-                                    </div>
-                                    <button onclick="deleteSession(${s.id})" class="text-slate-500 hover:text-red-400 font-bold text-xs">✕</button>
-                                </div>
-                                <div class="flex items-center justify-between text-[10px] pt-1">
-                                    <span class="bg-indigo-950 text-indigo-300 border border-indigo-800/50 px-2 py-0.5 rounded-md font-bold">📝 ${s.task}</span>
-                                    <button onclick="printAttendanceSheet('${s.grade}', '${s.location}', '${s.group}')" class="text-slate-400 hover:text-white underline">🖨️ كشف الحضور</button>
-                                </div>
-                                <div class="border-t border-slate-800/80 pt-2 flex items-center justify-between text-[11px]">
-                                    <span class="font-bold text-slate-300">⏰ ${s.startTime} - ${s.endTime}</span>
-                                    <span class="font-bold text-emerald-400">💰 ${s.studentCount * s.pricePerStudent} ج.م</span>
-                                </div>
-                            </div>
-                        `;
-                    });
-
-                    dayHtml += `</div></div>`;
-                    container.innerHTML += dayHtml;
-                }
+                            <button onclick="sendWhatsApp('${s.phone}', '${s.name}', 'absent')" class="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-1 rounded-lg border border-emerald-200 font-bold">💬 واتساب</button>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-xs font-bold pt-1 border-t">
+                            <button onclick="toggleAttendance(${s.id}, 'present')" class="py-1.5 rounded-xl ${state.status === 'present' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'}">
+                                ${state.status === 'present' ? '✅ حضر' : 'حضر'}
+                            </button>
+                            <button onclick="toggleAttendance(${s.id}, 'absent')" class="py-1.5 rounded-xl ${state.status === 'absent' ? 'bg-red-600 text-white' : 'bg-slate-100 text-slate-600'}">
+                                ${state.status === 'absent' ? '❌ غاب' : 'غاب'}
+                            </button>
+                            <button onclick="togglePaid(${s.id})" class="py-1.5 rounded-xl ${state.paid ? 'bg-indigo-600 text-white' : 'bg-amber-100 text-amber-800'}">
+                                ${state.paid ? '💵 دفع' : 'لم يدفع'}
+                            </button>
+                        </div>
+                    </div>
+                `;
             });
 
-            if (sessions.length === 0) {
-                container.innerHTML = `<div class="text-center py-12 text-slate-500 font-bold text-xs">لا توجد حصص مضافة. استخدم اللوحة الجانبية لإدراج أول حصة!</div>`;
-            }
+            document.getElementById('countPresent').innerText = presentCount;
+            document.getElementById('countAbsent').innerText = absentCount;
+            document.getElementById('countUnpaid').innerText = unpaidCount;
+            document.getElementById('todayTotal').innerText = totalCash.toLocaleString('ar-EG') + ' ج.م';
         }
 
-        function analyzeAndSuggest() {
-            const suggestionsBox = document.getElementById('suggestionsBox');
-            suggestionsBox.innerHTML = '';
-            let warnings = [];
+        function renderAll() {
+            document.getElementById('allStudentsList').innerHTML = students.map(s => `
+                <div class="bg-white border p-3 rounded-xl flex justify-between items-center text-xs">
+                    <div>
+                        <p class="font-bold text-slate-800">${s.name}</p>
+                        <p class="text-[10px] text-slate-400">${s.group} • 📞 ${s.phone}</p>
+                    </div>
+                    <button onclick="deleteStudent(${s.id})" class="text-red-500 font-bold px-2">مسح</button>
+                </div>
+            `).join('');
 
-            for (let i = 0; i < sessions.length; i++) {
-                for (let j = i + 1; j < sessions.length; j++) {
-                    const s1 = sessions[i];
-                    const s2 = sessions[j];
-                    if (s1.day === s2.day && ((s1.startTime < s2.endTime) && (s1.endTime > s2.startTime))) {
-                        warnings.push(`🚨 تعارض موعد في يوم ${s1.day} بين (${s1.grade}) و (${s2.grade})!`);
-                    }
-                }
-            }
-
-            if (warnings.length > 0) {
-                warnings.forEach(w => {
-                    suggestionsBox.innerHTML += `<div class="p-3 rounded-xl bg-red-950/50 text-red-300 border border-red-800/50 font-bold">${w}</div>`;
-                });
-            } else if(sessions.length > 0) {
-                suggestionsBox.innerHTML = `<div class="p-3 rounded-xl bg-emerald-950/40 text-emerald-300 border border-emerald-800/40 font-bold text-center">✅ الجدول منظم وبدون أي تداخل في الحصص!</div>`;
-            }
+            renderSessionList();
         }
 
-        function exportToImage() {
-            html2canvas(document.getElementById('schedulePaper'), { scale: 2, backgroundColor: '#0f172a' }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `جدول_${profile ? profile.name : 'المعلم'}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            });
-        }
-
-        checkOnboarding();
-        if(profile) saveAndRender();
+        loadData();
     </script>
 </body>
 </html>
