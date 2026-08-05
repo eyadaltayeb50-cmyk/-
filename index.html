@@ -3,294 +3,453 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منظّم جدول الطالب الذكي | Smart Student Planner</title>
+    <title>ClassFlow Pro | المنصة الذكية لإدارة جداول ودخل المعلمين</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts (Cairo) -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- html2canvas for Image Export -->
+    <!-- html2canvas for Exporting Images -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body {
-            font-family: 'Cairo', sans-serif;
-            background-color: #f8fafc;
-        }
-        @media print {
-            .no-print {
-                display: none !important;
-            }
-            body {
-                background-color: #ffffff;
-                padding: 0;
-            }
-            .print-container {
-                box-shadow: none !important;
-                border: none !important;
-                width: 100% !important;
-                max-width: 100% !important;
-            }
-        }
+        body { font-family: 'Cairo', sans-serif; background: #0f172a; color: #f8fafc; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass-card { background: rgba(51, 65, 85, 0.5); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .modal-active { display: flex !important; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
-<body class="min-h-screen text-slate-800 pb-12">
+<body class="min-h-screen pb-12 flex flex-col justify-between">
 
-    <!-- Header / Navbar -->
-    <header class="bg-indigo-900 text-white py-6 px-4 shadow-md no-print">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-black tracking-tight flex items-center gap-2">
-                    🎓 منظّم يوم وجدول الطالب الذكي
-                </h1>
-                <p class="text-indigo-200 text-sm mt-1">أنشئ جدولك اليومي والأسبوعي أوتوماتيكياً واحفظه كـ PDF أو صورة بنقرة واحدة</p>
+    <!-- Modal: Onboarding Wizard -->
+    <div id="onboardingModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden justify-center items-center p-4">
+        <div class="glass-panel rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl space-y-6">
+            <div class="text-center">
+                <div class="inline-block bg-indigo-600/20 text-indigo-400 p-3 rounded-2xl text-3xl mb-2">👨‍🏫</div>
+                <h2 class="text-2xl font-black text-white">مرحباً بك في ClassFlow Pro</h2>
+                <p class="text-xs text-slate-400 mt-1">خصص نظامك الخاص مرة واحدة. جميع بياناتك تحفظ بآمان على هاتفك فقط!</p>
             </div>
-            <div class="flex gap-3">
-                <button onclick="exportToImage()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl shadow transition text-sm flex items-center gap-2">
-                    🖼️ تحميل صورة PNG
+
+            <form id="onboardingForm" onsubmit="saveTeacherProfile(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5">الاسم واللقب (الذي يظهر في أعلى الجدول)</label>
+                    <input type="text" id="profName" required placeholder="مثال: أ/ إياد عمّار" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-indigo-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5">المادة الأساسية</label>
+                        <input type="text" id="profSubject" required placeholder="مثال: الفيزياء" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5">سعر الحصة الافتراضي (ج.م)</label>
+                        <input type="number" id="profDefaultPrice" value="60" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5">أماكن التدريس / السناتر (يفصل بينها بفصلة ,)</label>
+                    <input type="text" id="profLocations" required placeholder="سنتر الأمل, سنتر التفوق, درس خاص, أونلاين" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5">مجموعات الطلاب (يفصل بينها بفصلة ,)</label>
+                    <input type="text" id="profGroups" required placeholder="مجموعة أ, مجموعة ب, المتفوقين, بنين, بنات" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-indigo-500">
+                </div>
+
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black py-3.5 rounded-xl shadow-lg transition text-sm">
+                    🚀 حفظ وابدأ تنظيم جدولك
                 </button>
-                <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded-xl shadow transition text-sm flex items-center gap-2">
-                    🖨️ طباعة / حفظ PDF
+            </form>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="glass-panel border-b border-slate-800 py-4 px-6 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 text-white font-black p-2.5 rounded-2xl text-xl shadow-lg shadow-indigo-500/30">⚡</div>
+                <div>
+                    <h1 id="welcomeText" class="text-lg md:text-xl font-black text-white">ClassFlow Pro</h1>
+                    <p class="text-indigo-300 text-[11px]">منصة التخطيط والدخل المالي المتقدمة للمعلم</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="editProfile()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-3.5 py-2.5 rounded-xl transition border border-slate-700">
+                    ⚙️ تعديل الملف
+                </button>
+                <button onclick="exportToImage()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-lg shadow-emerald-600/20">
+                    📸 تصدير الجدول (PNG)
                 </button>
             </div>
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-        <!-- Controls / Inputs Panel -->
-        <section class="lg:col-span-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 no-print h-fit">
-            <h2 class="text-xl font-bold text-slate-800 border-b pb-3 mb-4 flex items-center gap-2">
-                ⚙️ تخصيص الخطة والجدول
-            </h2>
-
-            <form id="plannerForm" class="space-y-4" onsubmit="generateSchedule(event)">
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">اسم الطالب / المرحلة</label>
-                    <input type="text" id="studentName" value="إياد عمرو" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none" required>
+        <!-- Sidebar: Form Controls -->
+        <section class="lg:col-span-5 space-y-6">
+            <div class="glass-panel p-6 rounded-3xl space-y-5">
+                <div class="flex justify-between items-center border-b border-slate-700/60 pb-3">
+                    <h2 class="text-sm font-black text-white flex items-center gap-2">
+                        ➕ إدراج حصة جديدة
+                    </h2>
+                    <span class="text-[10px] bg-indigo-500/20 text-indigo-300 font-bold px-2.5 py-0.5 rounded-full border border-indigo-500/30">سريع بدون كتابة</span>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">المواد الدراسية (مفصولة بفاصلة)</label>
-                    <input type="text" id="subjects" value="فيزياء, أحياء, كيمياء, رياضيات, إنجليزي, عربي" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none" required>
-                </div>
+                <form id="sessionForm" onsubmit="addSession(event)" class="space-y-3.5">
+                    
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 mb-1">المرحلة الدراسية</label>
+                        <select id="grade" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 outline-none focus:border-indigo-500">
+                            <option value="الصف الأول الثانوي">الصف الأول الثانوي</option>
+                            <option value="الصف الثاني الثانوي">الصف الثاني الثانوي</option>
+                            <option value="الصف الثالث الثانوي">الصف الثالث الثانوي</option>
+                            <option value="الصف الأول الإعدادي">الصف الأول الإعدادي</option>
+                            <option value="الصف الثاني الإعدادي">الصف الثاني الإعدادي</option>
+                            <option value="الصف الثالث الإعدادي">الصف الثالث الإعدادي</option>
+                        </select>
+                    </div>
 
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1">اليوم</label>
+                            <select id="day" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 outline-none focus:border-indigo-500">
+                                <option value="السبت">السبت</option>
+                                <option value="الأحد">الأحد</option>
+                                <option value="الإثنين">الإثنين</option>
+                                <option value="الثلاثاء">الثلاثاء</option>
+                                <option value="الأربعاء">الأربعاء</option>
+                                <option value="الخميس">الخميس</option>
+                                <option value="الجمعة">الجمعة</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1">المكان / السنتر</label>
+                            <select id="locationSelect" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 outline-none focus:border-indigo-500"></select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1">المجموعة</label>
+                            <select id="groupSelect" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 outline-none focus:border-indigo-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1">تجهيز الحصة</label>
+                            <select id="task" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 outline-none focus:border-indigo-500">
+                                <option value="شرح درس جديد">شرح جديد</option>
+                                <option value="حل شيت واجب">واجب وسيشن حل</option>
+                                <option value="امتحان جزئي">امتحان جزئي</option>
+                                <option value="مراجعة شاملة">مراجعة شاملة</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1">من (البداية)</label>
+                            <select id="startTime" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 outline-none">
+                                <option value="08:00">08:00 ص</option>
+                                <option value="09:00">09:00 ص</option>
+                                <option value="10:00" selected>10:00 ص</option>
+                                <option value="11:00">11:00 ص</option>
+                                <option value="12:00">12:00 ظ</option>
+                                <option value="13:00">01:00 ظ</option>
+                                <option value="14:00">02:00 ظ</option>
+                                <option value="15:00">03:00 ع</option>
+                                <option value="16:00">04:00 ع</option>
+                                <option value="17:00">05:00 م</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 mb-1">إلى (النهاية)</label>
+                            <select id="endTime" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-slate-200 outline-none">
+                                <option value="10:00">10:00 ص</option>
+                                <option value="11:30">11:30 ص</option>
+                                <option value="12:00" selected>12:00 ظ</option>
+                                <option value="13:30">01:30 ظ</option>
+                                <option value="15:00">03:00 ع</option>
+                                <option value="17:00">05:00 م</option>
+                                <option value="19:00">07:00 م</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 bg-indigo-950/40 p-3 rounded-2xl border border-indigo-800/40">
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-300 mb-1">الطلاب المتوقعين</label>
+                            <input type="number" id="studentCount" value="20" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs font-bold text-center text-white outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-300 mb-1">سعر الحصة (ج.م)</label>
+                            <input type="number" id="pricePerStudent" value="60" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs font-bold text-center text-white outline-none">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-3 rounded-xl text-xs transition shadow-lg shadow-indigo-600/30">
+                        📌 إضافة الحصة للجدول
+                    </button>
+                </form>
+            </div>
+
+            <!-- Finance & Analytics Card -->
+            <div class="glass-panel p-5 rounded-3xl space-y-3">
+                <span class="text-[11px] text-slate-400 font-bold block">📊 ملخص الأسبوع المالي:</span>
                 <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">وقت الاستيقاظ</label>
-                        <input type="time" id="wakeTime" value="05:00" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none" required>
+                    <div class="bg-emerald-950/40 border border-emerald-800/40 p-3.5 rounded-2xl">
+                        <span class="text-[10px] font-bold text-emerald-400 block">الإيراد المتوقع</span>
+                        <span id="weeklyIncome" class="text-xl font-black text-emerald-300">0 ج.م</span>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">وقت النوم</label>
-                        <input type="time" id="sleepTime" value="22:00" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none" required>
+                    <div class="bg-indigo-950/40 border border-indigo-800/40 p-3.5 rounded-2xl">
+                        <span class="text-[10px] font-bold text-indigo-400 block">إجمالي الحصص</span>
+                        <span id="totalSessions" class="text-xl font-black text-indigo-300">0 حصة</span>
                     </div>
                 </div>
+            </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">هدف اليوم الرئيسي</label>
-                    <input type="text" id="mainGoal" value="حل 50 سؤال فيزياء + إنهاء ملخص الأحياء" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">أسلوب المذاكرة</label>
-                    <select id="studyStyle" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none">
-                        <option value="pomodoro">جلسات بومودورو (50 دقيقة تركيز / 10 دقائق راحة)</option>
-                        <option value="deep">جلسات عميقة (90 دقيقة تركيز / 20 دقيقة راحة)</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-extrabold py-3 rounded-xl shadow-lg transition flex justify-center items-center gap-2 mt-2">
-                    ✨ توليد الجدول الأوتوماتيكي
-                </button>
-            </form>
+            <!-- Warnings Container -->
+            <div id="suggestionsBox" class="space-y-2 text-xs"></div>
         </section>
 
-        <!-- Output Planner Paper Container -->
-        <section class="lg:col-span-8">
-            <div id="plannerPaper" class="print-container bg-white p-6 md:p-8 rounded-2xl shadow-md border border-slate-200">
-                
-                <!-- Printable Banner Header -->
-                <div class="bg-gradient-to-r from-indigo-950 via-indigo-900 to-indigo-800 text-white p-6 rounded-xl mb-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <!-- Main Schedule Board -->
+        <section class="lg:col-span-7">
+            <div id="schedulePaper" class="glass-panel p-6 rounded-3xl space-y-5">
+                <div class="flex justify-between items-center border-b border-slate-700/60 pb-4">
                     <div>
-                        <span class="bg-indigo-500/30 text-indigo-200 text-xs font-bold px-3 py-1 rounded-full border border-indigo-400/20">خطة النجاح اليومية والأسبوعية</span>
-                        <h2 id="displayStudentName" class="text-2xl md:text-3xl font-black mt-1">جدول الطالب: إياد عمرو</h2>
-                        <p class="text-xs text-indigo-200 mt-1">تم التنظيم أوتوماتيكياً وفقاً لتقنية التركيز المتقطع وراحة العقل</p>
+                        <h2 id="teacherHeader" class="text-lg font-black text-white">جدول الحصص</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">جدول منظم ومحسوب تلقائياً</p>
                     </div>
-                    <div class="bg-white/10 backdrop-blur-md p-3 rounded-lg border border-white/15 text-left text-xs space-y-1 min-w-[140px]">
-                        <div><strong>التاريخ:</strong> <span id="currentDate"></span></div>
-                        <div><strong>النظام:</strong> <span id="displayStyle">Pomodoro 50/10</span></div>
-                        <div><strong>الحالة:</strong> <span class="text-emerald-300 font-bold">نشط ومكتمل</span></div>
-                    </div>
+                    <button onclick="clearAll()" class="text-xs text-red-400 font-bold hover:underline">إعادة ضبط</button>
                 </div>
 
-                <!-- Goals & Notes Box -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="md:col-span-2 bg-indigo-50/60 border border-indigo-100 p-4 rounded-xl">
-                        <h3 class="text-xs font-extrabold text-indigo-900 mb-1 flex items-center gap-1">🎯 الهدف الرئيسي لليوم:</h3>
-                        <p id="displayGoal" class="text-sm font-bold text-indigo-950">حل 50 سؤال فيزياء + إنهاء ملخص الأحياء</p>
-                    </div>
-                    <div class="bg-amber-50/70 border border-amber-200/60 p-4 rounded-xl">
-                        <h3 class="text-xs font-extrabold text-amber-900 mb-1">💡 نصيحة التركيز:</h3>
-                        <p class="text-xs text-amber-950 font-medium leading-relaxed">ابتدئ بالمادة الأكثر صعوبة عندما تكون طاقتك الذهنية في أعلى مستوياتها!</p>
-                    </div>
-                </div>
-
-                <!-- Schedules Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    
-                    <!-- Left Column: Daily Timeline Routine -->
-                    <div>
-                        <h3 class="text-sm font-extrabold text-slate-800 bg-slate-100 p-2.5 rounded-lg border-r-4 border-indigo-600 mb-3 flex items-center gap-2">
-                            ⏰ الجدول الزمني اليومي (Daily Routine)
-                        </h3>
-                        <div id="timelineContainer" class="space-y-2">
-                            <!-- Injected via JS -->
-                        </div>
-                    </div>
-
-                    <!-- Right Column: Weekly Subject Distribution -->
-                    <div>
-                        <h3 class="text-sm font-extrabold text-slate-800 bg-slate-100 p-2.5 rounded-lg border-r-4 border-emerald-600 mb-3 flex items-center gap-2">
-                            📅 توزيع المواد الأسبوعي
-                        </h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-xs text-right border-collapse border border-slate-200 rounded-lg overflow-hidden">
-                                <thead>
-                                    <tr class="bg-slate-200 text-slate-700 font-extrabold">
-                                        <th class="p-2 border border-slate-300">اليوم</th>
-                                        <th class="p-2 border border-slate-300">التركيز الأساسي</th>
-                                        <th class="p-2 border border-slate-300">المراجعة</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="weeklyTableBody">
-                                    <!-- Injected via JS -->
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Habit Checklist -->
-                        <div class="mt-6 bg-slate-50 border border-slate-200 p-4 rounded-xl">
-                            <h3 class="text-xs font-bold text-slate-700 mb-2.5">✅ قائمة تفقد العادات اليومية:</h3>
-                            <div class="space-y-2 text-xs">
-                                <label class="flex items-center gap-2 text-slate-700 cursor-pointer">
-                                    <input type="checkbox" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500">
-                                    <span>شرب 2 لتر من الماء خلال ساعات المذاكرة</span>
-                                </label>
-                                <label class="flex items-center gap-2 text-slate-700 cursor-pointer">
-                                    <input type="checkbox" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500">
-                                    <span>إغلاق الهاتف تماماً أثناء جلسات التركيز</span>
-                                </label>
-                                <label class="flex items-center gap-2 text-slate-700 cursor-pointer">
-                                    <input type="checkbox" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500">
-                                    <span>مراجعة أخطاء حل أسئلة الأمس</span>
-                                </label>
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <!-- Footer Tag -->
-                <div class="mt-8 pt-4 border-t border-slate-200 text-center text-xs text-slate-400 font-medium">
-                    منظّم جدول الطالب الذكي © 2026 | جاهز للطباعة المباشرة وNetlify
-                </div>
-
+                <div id="scheduleGrid" class="space-y-4"></div>
             </div>
         </section>
 
     </main>
 
+    <!-- Footer -->
+    <footer class="mt-12 text-center text-xs text-slate-500 py-4 border-t border-slate-800/60">
+        ClassFlow Pro • منصة المعلم الذكية لإدارة المواقيت والدخل
+    </footer>
+
     <script>
-        // Set Current Date
-        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('ar-EG', {
-            year: 'numeric', month: 'short', day: 'numeric'
-        });
+        const days = ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
+        let profile = JSON.parse(localStorage.getItem('cf_pro_profile')) || null;
+        let sessions = JSON.parse(localStorage.getItem('cf_pro_sessions')) || [];
 
-        const daysOfWeek = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس"];
-
-        function generateSchedule(e) {
-            if(e) e.preventDefault();
-
-            const studentName = document.getElementById('studentName').value;
-            const rawSubjects = document.getElementById('subjects').value;
-            const mainGoal = document.getElementById('mainGoal').value;
-            const wakeTime = document.getElementById('wakeTime').value;
-            const sleepTime = document.getElementById('sleepTime').value;
-            const style = document.getElementById('studyStyle').value;
-
-            const subjects = rawSubjects.split(',').map(s => s.trim()).filter(s => s.length > 0);
-
-            // Update Header Display
-            document.getElementById('displayStudentName').innerText = "جدول الطالب: " + studentName;
-            document.getElementById('displayGoal').innerText = mainGoal || "التركيز وإتمام المقررات اليومية";
-            document.getElementById('displayStyle').innerText = style === 'pomodoro' ? 'Pomodoro (50/10)' : 'Deep Work (90/20)';
-
-            // Build Daily Timeline
-            const timelineContainer = document.getElementById('timelineContainer');
-            timelineContainer.innerHTML = '';
-
-            const routine = [
-                { time: wakeTime, title: "الاستيقاظ + الصلاة والنشاط المبكر", type: "rest" },
-                { time: addMinutes(wakeTime, 45), title: `جلسة مذاكرة 1: ${subjects[0] || 'المادة الأولى'}`, type: "study" },
-                { time: addMinutes(wakeTime, 120), title: "وجبة الإفطار واستراحة عقلية", type: "rest" },
-                { time: addMinutes(wakeTime, 180), title: `جلسة مذاكرة 2: ${subjects[1] || 'المادة الثانية'}`, type: "study" },
-                { time: addMinutes(wakeTime, 280), title: "صلاة الظهر + غداء وراحة", type: "rest" },
-                { time: addMinutes(wakeTime, 360), title: `حل تمارين وتطبيقات: ${subjects[2] || subjects[0] || 'تطبيقات'}`, type: "study" },
-                { time: addMinutes(wakeTime, 480), title: "وقت حر + ممارسة رياضة أو مشي", type: "rest" },
-                { time: addMinutes(wakeTime, 570), title: "جلسة مراجعة سريعة وتجهيز أدوات الغد", type: "rev" },
-                { time: sleepTime, title: "الاستعداد للنوم العميق وتعديل الذاكرة", type: "rest" }
-            ];
-
-            routine.forEach(item => {
-                let badgeClass = "bg-indigo-100 text-indigo-800 border-indigo-200";
-                if(item.type === 'rest') badgeClass = "bg-emerald-50 text-emerald-800 border-emerald-200";
-                if(item.type === 'rev') badgeClass = "bg-amber-50 text-amber-800 border-amber-200";
-
-                timelineContainer.innerHTML += `
-                    <div class="flex items-center gap-3 p-2 rounded-lg border text-xs ${badgeClass}">
-                        <span class="font-bold min-w-[90px] text-center bg-white/80 py-1 px-2 rounded border border-inherit">${item.time}</span>
-                        <span class="font-semibold">${item.title}</span>
-                    </div>
-                `;
-            });
-
-            // Build Weekly Distribution
-            const weeklyBody = document.getElementById('weeklyTableBody');
-            weeklyBody.innerHTML = '';
-
-            daysOfWeek.forEach((day, index) => {
-                const primarySubj = subjects[index % subjects.length] || "مراجعة شاملة";
-                const revSubj = subjects[(index + 2) % subjects.length] || "حل امتحانات";
-
-                weeklyBody.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition border-b border-slate-200">
-                        <td class="p-2 border border-slate-200 font-extrabold text-slate-700 bg-slate-50">${day}</td>
-                        <td class="p-2 border border-slate-200"><span class="bg-indigo-100 text-indigo-900 font-bold px-2 py-0.5 rounded">${primarySubj}</span></td>
-                        <td class="p-2 border border-slate-200 font-medium text-slate-600">${revSubj}</td>
-                    </tr>
-                `;
-            });
+        function checkOnboarding() {
+            if (!profile) {
+                document.getElementById('onboardingModal').classList.add('modal-active');
+            } else {
+                document.getElementById('onboardingModal').classList.remove('modal-active');
+                setupProfileUI();
+            }
         }
 
-        function addMinutes(timeStr, minsToAdd) {
-            if(!timeStr) return "00:00";
-            const [hours, minutes] = timeStr.split(':').map(Number);
-            const date = new Date();
-            date.setHours(hours, minutes + minsToAdd, 0);
-            return date.toTimeString().substring(0, 5);
+        function saveTeacherProfile(e) {
+            e.preventDefault();
+            profile = {
+                name: document.getElementById('profName').value,
+                subject: document.getElementById('profSubject').value,
+                defaultPrice: Number(document.getElementById('profDefaultPrice').value) || 60,
+                locations: document.getElementById('profLocations').value.split(',').map(s => s.trim()).filter(Boolean),
+                groups: document.getElementById('profGroups').value.split(',').map(s => s.trim()).filter(Boolean)
+            };
+            localStorage.setItem('cf_pro_profile', JSON.stringify(profile));
+            checkOnboarding();
+            saveAndRender();
+        }
+
+        function editProfile() {
+            if(!profile) return;
+            document.getElementById('profName').value = profile.name;
+            document.getElementById('profSubject').value = profile.subject;
+            document.getElementById('profDefaultPrice').value = profile.defaultPrice;
+            document.getElementById('profLocations').value = profile.locations.join(', ');
+            document.getElementById('profGroups').value = profile.groups.join(', ');
+            document.getElementById('onboardingModal').classList.add('modal-active');
+        }
+
+        function setupProfileUI() {
+            document.getElementById('welcomeText').innerText = `جدول ${profile.name} (${profile.subject})`;
+            document.getElementById('teacherHeader').innerText = `جدول أسبوع التدريس - ${profile.name}`;
+            document.getElementById('pricePerStudent').value = profile.defaultPrice;
+
+            document.getElementById('locationSelect').innerHTML = profile.locations.map(l => `<option value="${l}">${l}</option>`).join('');
+            document.getElementById('groupSelect').innerHTML = profile.groups.map(g => `<option value="${g}">${g}</option>`).join('');
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('cf_pro_sessions', JSON.stringify(sessions));
+            renderSchedule();
+            calculateIncome();
+            analyzeAndSuggest();
+        }
+
+        function addSession(e) {
+            e.preventDefault();
+            const newSession = {
+                id: Date.now(),
+                subject: profile ? profile.subject : "مادة",
+                grade: document.getElementById('grade').value,
+                day: document.getElementById('day').value,
+                location: document.getElementById('locationSelect').value,
+                group: document.getElementById('groupSelect').value,
+                startTime: document.getElementById('startTime').value,
+                endTime: document.getElementById('endTime').value,
+                task: document.getElementById('task').value,
+                studentCount: Number(document.getElementById('studentCount').value) || 0,
+                pricePerStudent: Number(document.getElementById('pricePerStudent').value) || 0
+            };
+
+            sessions.push(newSession);
+            saveAndRender();
+        }
+
+        function deleteSession(id) {
+            sessions = sessions.filter(s => s.id !== id);
+            saveAndRender();
+        }
+
+        function clearAll() {
+            if(confirm('هل تريد إعادة ضبط الجدول ومسح الحصص؟')) {
+                sessions = [];
+                saveAndRender();
+            }
+        }
+
+        function calculateIncome() {
+            let totalIncome = 0;
+            sessions.forEach(s => totalIncome += (s.studentCount * s.pricePerStudent));
+            document.getElementById('weeklyIncome').innerText = totalIncome.toLocaleString('ar-EG') + ' ج.م';
+            document.getElementById('totalSessions').innerText = sessions.length + ' حصة';
+        }
+
+        function printAttendanceSheet(grade, location, group) {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html dir="rtl">
+                <head>
+                    <title>كشف حضور - ${grade}</title>
+                    <style>
+                        body { font-family: sans-serif; padding: 20px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #000; padding: 8px; text-align: center; font-size: 12px; }
+                        th { background: #f2f2f2; }
+                    </style>
+                </head>
+                <body>
+                    <h2>كشف حضور وغياب الطلاب - ClassFlow</h2>
+                    <p><strong>المعلم:</strong> ${profile ? profile.name : ''} | <strong>المادة:</strong> ${profile ? profile.subject : ''}</p>
+                    <p><strong>الصف:</strong> ${grade} | <strong>المكان:</strong> ${location} | <strong>المجموعة:</strong> ${group}</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>اسم الطالب</th>
+                                <th>رقم الهاتف</th>
+                                <th>الدفعة (مصاريف)</th>
+                                <th>الغياب</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Array.from({length: 15}).map((_, i) => `<tr><td>${i+1}</td><td></td><td></td><td></td><td></td></tr>`).join('')}
+                        </tbody>
+                    </table>
+                    <script>window.print();<\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        function renderSchedule() {
+            const container = document.getElementById('scheduleGrid');
+            container.innerHTML = '';
+
+            days.forEach(day => {
+                const daySessions = sessions.filter(s => s.day === day).sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+                if (daySessions.length > 0) {
+                    let dayHtml = `
+                        <div class="glass-card rounded-2xl overflow-hidden border border-slate-700/50">
+                            <div class="bg-slate-800/80 px-4 py-2 font-bold text-xs text-slate-200 flex justify-between items-center border-b border-slate-700/50">
+                                <span>📅 ${day}</span>
+                                <span class="bg-indigo-600 text-white px-2.5 py-0.5 rounded-full font-bold text-[10px]">${daySessions.length} حصص</span>
+                            </div>
+                            <div class="p-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    `;
+
+                    daySessions.forEach(s => {
+                        dayHtml += `
+                            <div class="bg-slate-900/80 border border-slate-700/60 rounded-xl p-3.5 space-y-2 relative">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-extrabold text-sm text-indigo-200">${s.grade}</h4>
+                                        <p class="text-[11px] text-slate-400 font-semibold mt-0.5">📍 ${s.location} • 👥 ${s.group}</p>
+                                    </div>
+                                    <button onclick="deleteSession(${s.id})" class="text-slate-500 hover:text-red-400 font-bold text-xs">✕</button>
+                                </div>
+                                <div class="flex items-center justify-between text-[10px] pt-1">
+                                    <span class="bg-indigo-950 text-indigo-300 border border-indigo-800/50 px-2 py-0.5 rounded-md font-bold">📝 ${s.task}</span>
+                                    <button onclick="printAttendanceSheet('${s.grade}', '${s.location}', '${s.group}')" class="text-slate-400 hover:text-white underline">🖨️ كشف الحضور</button>
+                                </div>
+                                <div class="border-t border-slate-800/80 pt-2 flex items-center justify-between text-[11px]">
+                                    <span class="font-bold text-slate-300">⏰ ${s.startTime} - ${s.endTime}</span>
+                                    <span class="font-bold text-emerald-400">💰 ${s.studentCount * s.pricePerStudent} ج.م</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    dayHtml += `</div></div>`;
+                    container.innerHTML += dayHtml;
+                }
+            });
+
+            if (sessions.length === 0) {
+                container.innerHTML = `<div class="text-center py-12 text-slate-500 font-bold text-xs">لا توجد حصص مضافة. استخدم اللوحة الجانبية لإدراج أول حصة!</div>`;
+            }
+        }
+
+        function analyzeAndSuggest() {
+            const suggestionsBox = document.getElementById('suggestionsBox');
+            suggestionsBox.innerHTML = '';
+            let warnings = [];
+
+            for (let i = 0; i < sessions.length; i++) {
+                for (let j = i + 1; j < sessions.length; j++) {
+                    const s1 = sessions[i];
+                    const s2 = sessions[j];
+                    if (s1.day === s2.day && ((s1.startTime < s2.endTime) && (s1.endTime > s2.startTime))) {
+                        warnings.push(`🚨 تعارض موعد في يوم ${s1.day} بين (${s1.grade}) و (${s2.grade})!`);
+                    }
+                }
+            }
+
+            if (warnings.length > 0) {
+                warnings.forEach(w => {
+                    suggestionsBox.innerHTML += `<div class="p-3 rounded-xl bg-red-950/50 text-red-300 border border-red-800/50 font-bold">${w}</div>`;
+                });
+            } else if(sessions.length > 0) {
+                suggestionsBox.innerHTML = `<div class="p-3 rounded-xl bg-emerald-950/40 text-emerald-300 border border-emerald-800/40 font-bold text-center">✅ الجدول منظم وبدون أي تداخل في الحصص!</div>`;
+            }
         }
 
         function exportToImage() {
-            const element = document.getElementById('plannerPaper');
-            html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
+            html2canvas(document.getElementById('schedulePaper'), { scale: 2, backgroundColor: '#0f172a' }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'جدول_الطالب_الذكي.png';
+                link.download = `جدول_${profile ? profile.name : 'المعلم'}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             });
         }
 
-        // Initial Generation on Load
-        generateSchedule();
+        checkOnboarding();
+        if(profile) saveAndRender();
     </script>
 </body>
 </html>
