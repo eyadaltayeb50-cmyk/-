@@ -3,183 +3,409 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مساعد الحصة السريع - Classroom</title>
+    <title>مساعد الحصة - المنصة المتكاملة للمدرسين</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Supabase Client -->
+    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style> body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; } </style>
+    <style> 
+        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; } 
+    </style>
 </head>
-<body class="pb-24">
+<body class="bg-slate-50 min-h-screen pb-12">
 
-    <!-- Header -->
-    <header class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-50 flex justify-between items-center">
-        <div>
-            <h1 class="font-black text-lg">⚡ مساعد الحصة (Classroom 🌐)</h1>
-            <p class="text-[11px] text-indigo-200">مربوط بالكامل مع Supabase Cloud</p>
+    <!-- Navbar -->
+    <nav class="bg-white border-b sticky top-0 z-50 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="showPage('Landing')">
+                <span class="text-2xl">⚡</span>
+                <span class="font-black text-indigo-600 text-lg">مساعد الحصة</span>
+            </div>
+            <div id="navButtons" class="flex gap-2">
+                <button onclick="showPage('AdminLogin')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-xl border transition">دخول الأدمن 👑</button>
+                <button onclick="showPage('TeacherLogin')" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl shadow-md transition">دخول المدرسين 🔑</button>
+            </div>
         </div>
-        <div class="text-left bg-indigo-700 px-3 py-1 rounded-xl">
-            <span class="text-[10px] text-indigo-200 block">حصيلة اليوم</span>
-            <span id="todayTotal" class="font-black text-emerald-300 text-sm">0 ج.م</span>
+    </nav>
+
+    <!-- 1. LANDING PAGE (الصفحة الرئيسية) -->
+    <section id="pageLanding" class="max-w-4xl mx-auto p-4 md:p-8 space-y-12">
+        <div class="text-center space-y-4 pt-6">
+            <span class="bg-indigo-100 text-indigo-700 text-xs font-black px-3 py-1.5 rounded-full">المنصة رقم #1 لإدارة السنتر ومتابعة أولياء الأمور</span>
+            <h1 class="text-3xl md:text-5xl font-black text-slate-800 leading-tight">أدر حصصك، حضور طلابك، وتواصل مع أولياء الأمور تلقائياً 🚀</h1>
+            <p class="text-slate-500 text-sm md:text-base max-w-xl mx-auto">نظام سحابي متكامل للمدرسين للتحكم في الحضور والغياب، التحصيل المالي، وتنبيهات الواتساب الفورية الموجهة لولاة الأمور بكود مصر التلقائي.</p>
+            <div class="pt-2">
+                <button onclick="showPage('TeacherLogin')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-8 py-3.5 rounded-2xl text-sm shadow-lg shadow-indigo-200 transition">تسجيل الدخول للنظام ⚡</button>
+            </div>
         </div>
-    </header>
 
-    <!-- Navigation Tabs -->
-    <div class="flex border-b bg-white text-xs font-bold text-center">
-        <button onclick="switchTab('session')" id="tabSession" class="flex-1 py-3 text-indigo-600 border-b-2 border-indigo-600">📖 الحصة الحالية</button>
-        <button onclick="switchTab('students')" id="tabStudents" class="flex-1 py-3 text-slate-500">👥 إدارة الطلاب</button>
-    </div>
-
-    <!-- MAIN CONTAINER -->
-    <main class="p-4 max-w-lg mx-auto">
-
-        <!-- TAB 1: SESSION MODE -->
-        <section id="secSession" class="space-y-4">
-            <div class="bg-white p-3 rounded-2xl shadow-sm border space-y-2">
-                <label class="block text-xs font-bold text-slate-600">اختر المجموعة:</label>
-                <select id="sessionGroupSelect" onchange="renderSessionList()" class="w-full bg-slate-50 border rounded-xl p-2.5 text-xs font-bold text-slate-800 outline-none"></select>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white p-5 rounded-2xl border shadow-sm space-y-2">
+                <div class="text-2xl">📱</div>
+                <h3 class="font-bold text-sm text-slate-800">حضور بنقرة زر</h3>
+                <p class="text-xs text-slate-500">تسجيل سريع للحضور والغياب للطلاب لكل مجموعة مع ربط مالي مباشر.</p>
             </div>
-
-            <!-- Stats Bar -->
-            <div class="grid grid-cols-3 gap-2 text-center text-xs font-bold">
-                <div class="bg-emerald-50 text-emerald-700 border border-emerald-200 p-2 rounded-xl">
-                    <span class="block text-[10px] text-slate-500">حضر</span>
-                    <span id="countPresent" class="text-sm font-black">0</span>
-                </div>
-                <div class="bg-red-50 text-red-700 border border-red-200 p-2 rounded-xl">
-                    <span class="block text-[10px] text-slate-500">غاب</span>
-                    <span id="countAbsent" class="text-sm font-black">0</span>
-                </div>
-                <div class="bg-amber-50 text-amber-700 border border-amber-200 p-2 rounded-xl">
-                    <span class="block text-[10px] text-slate-500">لم يدفع</span>
-                    <span id="countUnpaid" class="text-sm font-black">0</span>
-                </div>
+            <div class="bg-white p-5 rounded-2xl border shadow-sm space-y-2">
+                <div class="text-2xl">💬</div>
+                <h3 class="font-bold text-sm text-slate-800">رسائل أولياء الأمور</h3>
+                <p class="text-xs text-slate-500">إرسال رسائل جماعية وفردية لولاة الأمور تحتوي على ميعاد الحصة وحالة الطالب بنقرة واحدة.</p>
             </div>
-
-            <div id="sessionStudentsList" class="space-y-3">
-                <p class="text-center text-xs text-slate-400 py-6">جاري تحميل البيانات من قاعدة البيانات...</p>
+            <div class="bg-white p-5 rounded-2xl border shadow-sm space-y-2">
+                <div class="text-2xl">📊</div>
+                <h3 class="font-bold text-sm text-slate-800">حصيلة مالية لحظية</h3>
+                <p class="text-xs text-slate-500">معرفة إجمالي الدخل اليومي وعدد الطلاب غير الدافعين بوضوح تام.</p>
             </div>
-        </section>
+        </div>
 
-        <!-- TAB 2: STUDENTS MANAGEMENT -->
-        <section id="secStudents" class="space-y-4 hidden">
-            <form onsubmit="addStudent(event)" class="bg-white p-4 rounded-2xl shadow-sm border space-y-3">
-                <h3 class="font-black text-xs text-slate-800">➕ إضافة طالب جديد</h3>
-                <input type="text" id="stdName" placeholder="اسم الطالب" required class="w-full border rounded-xl p-2.5 text-xs font-bold bg-slate-50 outline-none">
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="tel" id="stdPhone" placeholder="رقم ولي الأمر (واتساب)" required class="w-full border rounded-xl p-2.5 text-xs font-bold bg-slate-50 outline-none">
-                    <input type="number" id="stdFee" placeholder="المبلغ (ج.م)" value="60" required class="w-full border rounded-xl p-2.5 text-xs font-bold bg-slate-50 outline-none">
+        <div class="bg-gradient-to-br from-indigo-900 to-slate-900 text-white p-8 rounded-3xl text-center space-y-4 shadow-2xl relative overflow-hidden">
+            <span class="bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase">عرض محدود</span>
+            <h2 class="text-2xl font-black">اشتراك المدرس مدى الحياة ♾️</h2>
+            <p class="text-xs text-indigo-200">ادفع مرة واحدة فقط واستمتع بكافة مميزات المنصة بدون أي تجديدات شهرية.</p>
+            <div class="py-2">
+                <span id="displayLifetimePrice" class="text-4xl font-black text-emerald-400">---</span>
+                <span class="text-xs text-slate-300"> جنيه مصري</span>
+            </div>
+            <p class="text-[11px] text-slate-400">شامل الدعم الفني وتحديثات النظام المستمرة.</p>
+        </div>
+    </section>
+
+    <!-- 2. TEACHER LOGIN -->
+    <section id="pageTeacherLogin" class="hidden max-w-sm mx-auto p-4 pt-12">
+        <div class="bg-white p-6 rounded-3xl shadow-xl border space-y-4">
+            <h2 class="text-xl font-black text-indigo-600 text-center">دخول المدرسين 🔑</h2>
+            <form onsubmit="handleTeacherLogin(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">البريد الإلكتروني</label>
+                    <input type="email" id="teacherEmail" required placeholder="teacher@gmail.com" class="w-full border rounded-xl p-2.5 text-xs font-bold bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
-                <input type="text" id="stdGroup" placeholder="المجموعة (مثال: ثانوية - سنتر الأمل)" required class="w-full border rounded-xl p-2.5 text-xs font-bold bg-slate-50 outline-none">
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs transition">حفظ في قاعدة البيانات ☁️</button>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">كلمة السر</label>
+                    <input type="password" id="teacherPassword" required placeholder="••••••••" class="w-full border rounded-xl p-2.5 text-xs font-bold bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs transition">دخول للحساب</button>
             </form>
+            <p id="teacherLoginMsg" class="text-center text-xs font-bold text-red-500 hidden"></p>
+        </div>
+    </section>
 
-            <div id="allStudentsList" class="space-y-2"></div>
-        </section>
+    <!-- 3. ADMIN LOGIN -->
+    <section id="pageAdminLogin" class="hidden max-w-sm mx-auto p-4 pt-12">
+        <div class="bg-slate-900 text-white p-6 rounded-3xl shadow-2xl border border-slate-800 space-y-4">
+            <h2 class="text-xl font-black text-amber-400 text-center">لوحة أدمن النظام 👑</h2>
+            <form onsubmit="handleAdminLogin(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">رقم الموبايل</label>
+                    <input type="text" id="adminPhone" required placeholder="01094978855" class="w-full border border-slate-700 rounded-xl p-2.5 text-xs font-bold bg-slate-800 text-white outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">الباسورد</label>
+                    <input type="password" id="adminPass" required placeholder="••••••••" class="w-full border border-slate-700 rounded-xl p-2.5 text-xs font-bold bg-slate-800 text-white outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-2.5 rounded-xl text-xs transition">دخول اللوحة الفائقة ⚡</button>
+            </form>
+            <p id="adminLoginMsg" class="text-center text-xs font-bold text-red-400 hidden"></p>
+        </div>
+    </section>
 
-    </main>
+    <!-- 4. ADMIN DASHBOARD -->
+    <section id="pageAdminDashboard" class="hidden max-w-3xl mx-auto p-4 space-y-6">
+        <div class="flex justify-between items-center bg-slate-900 text-white p-4 rounded-2xl shadow-md">
+            <h2 class="font-black text-sm text-amber-400">👑 لوحة الإدارة المركزية</h2>
+            <button onclick="logoutAdmin()" class="bg-red-500 hover:bg-red-600 text-xs px-3 py-1.5 rounded-xl font-bold transition">خروج</button>
+        </div>
 
+        <div class="bg-white p-4 rounded-2xl border space-y-3 shadow-sm">
+            <h3 class="font-bold text-xs text-slate-800">💰 تحديد سعر الاشتراك مدى الحياة</h3>
+            <div class="flex gap-2">
+                <input type="number" id="inputLifetimePrice" placeholder="السعر بالجنيه" class="border rounded-xl p-2.5 text-xs font-bold bg-slate-50 outline-none flex-1">
+                <button onclick="saveLifetimePrice()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition">حفظ وتعديل السعر 💾</button>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border space-y-3 shadow-sm">
+            <h3 class="font-bold text-xs text-slate-800">➕ إضافة مدرس جديد للسيستم</h3>
+            <form onsubmit="addTeacherAccount(event)" class="space-y-2">
+                <input type="email" id="newTeacherEmail" placeholder="البريد الإلكتروني للمدرس" required class="w-full border rounded-xl p-2.5 text-xs font-bold bg-slate-50 outline-none">
+                <input type="text" id="newTeacherPass" placeholder="كلمة السر المخصصة" required class="w-full border rounded-xl p-2.5 text-xs font-bold bg-slate-50 outline-none">
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs transition">إنشاء حساب المدرس 🚀</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- 5. TEACHER DASHBOARD -->
+    <section id="pageTeacherDashboard" class="hidden">
+        <header class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-50 flex justify-between items-center">
+            <div>
+                <h1 class="font-black text-sm md:text-base">⚡ مساعد الحصة</h1>
+                <p id="teacherBadge" class="text-[10px] text-indigo-200">مدرس معتمد</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="text-left bg-indigo-700 px-3 py-1 rounded-xl">
+                    <span class="text-[9px] text-indigo-200 block">حصيلة اليوم</span>
+                    <span id="todayTotal" class="font-black text-emerald-300 text-xs">0 ج.م</span>
+                </div>
+                <button onclick="logoutTeacher()" class="bg-red-500 hover:bg-red-600 text-white text-[10px] px-2.5 py-2 rounded-xl font-bold transition">خروج 🚪</button>
+            </div>
+        </header>
+
+        <div class="flex border-b bg-white text-xs font-bold text-center">
+            <button onclick="switchTeacherTab('session')" id="tabSession" class="flex-1 py-3 text-indigo-600 border-b-2 border-indigo-600">📖 الحصة الحالية</button>
+            <button onclick="switchTeacherTab('broadcast')" id="tabBroadcast" class="flex-1 py-3 text-slate-500">📢 إرسال جماعي لولاة الأمور</button>
+            <button onclick="switchTeacherTab('students')" id="tabStudents" class="flex-1 py-3 text-slate-500">👥 إدارة الطلاب</button>
+        </div>
+
+        <main class="p-4 max-w-lg mx-auto space-y-4">
+            <!-- TAB 1: الحصة الحالية -->
+            <section id="secSession" class="space-y-4">
+                <div class="bg-white p-3 rounded-2xl border space-y-2 shadow-sm">
+                    <label class="block text-xs font-bold text-slate-600">اختر المجموعة:</label>
+                    <select id="sessionGroupSelect" onchange="renderSessionList()" class="w-full bg-slate-50 border rounded-xl p-2.5 text-xs font-bold text-slate-800 outline-none"></select>
+                </div>
+                <div id="sessionStudentsList" class="space-y-3"></div>
+            </section>
+
+            <!-- TAB 2: الإرسال الجماعي لولاة الأمور -->
+            <section id="secBroadcast" class="space-y-4 hidden">
+                <div class="bg-white p-4 rounded-2xl border space-y-3 shadow-sm">
+                    <h3 class="font-black text-xs text-slate-800">📢 إرسال رسائل جماعية لولاة الأمور</h3>
+                    <p class="text-[11px] text-slate-500">اختر صيغة الرسالة التلقائية أو قم بتخصيصها. سيتم استبدال المتغيرات تلقائياً لكل ولي أمر.</p>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">اختر قالب جاهز:</label>
+                        <select id="templateSelect" onchange="applyTemplate()" class="w-full border rounded-xl p-2 text-xs font-bold bg-slate-50">
+                            <option value="absent">قالب 1: إشعارات الغياب اليومي</option>
+                            <option value="attendance">قالب 2: تأكيد الحضور والالتزام</option>
+                            <option value="payment">قالب 3: تذكير بمصروفات الحصة</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">نص الرسالة (يمكنك التعديل عليه):</label>
+                        <textarea id="broadcastText" rows="4" class="w-full border rounded-xl p-2.5 text-xs font-bold bg-slate-50 outline-none leading-relaxed"></textarea>
+                    </div>
+
+                    <div class="text-[10px] text-indigo-600 bg-indigo-50 p-2 rounded-xl font-bold leading-normal">
+                        المتغيرات المتاحة: {parent_name} (ولي الأمر)، {student_name} (الطالب)، {group_name} (المجموعة)، {group_time} (الميعاد)، {status} (حالة الحضور/الدفع)
+                    </div>
+
+                    <button onclick="sendBulkMessages()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs shadow-md transition flex items-center justify-center gap-2">
+                        <span>💬 إرسال الدفعة الحالية على واتساب</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- TAB 3: إدارة الطلاب -->
+            <section id="secStudents" class="space-y-4 hidden">
+                <form onsubmit="addStudent(event)" class="bg-white p-4 rounded-2xl border space-y-3 shadow-sm">
+                    <h3 class="font-black text-xs text-slate-800">➕ إضافة طالب جديد</h3>
+                    <input type="text" id="stdName" placeholder="اسم الطالب" required class="w-full border rounded-xl p-2.5 text-xs font-bold bg-slate-50 outline-none">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">رقم ولي الأمر (بدون كود الدولة - مصر تلقائي):</label>
+                        <div class="flex items-center gap-1 border rounded-xl p-1 bg-slate-50">
+                            <span class="text-xs font-black text-slate-500 px-2">🇪🇬 +20</span>
+                            <input type="tel" id="stdPhone" placeholder="010xxxxxxx" required class="w-full bg-transparent p-1.5 text-xs font-bold outline-none">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="number" id="stdFee" placeholder="المبلغ (ج.م)" value="60" required class="w-full border rounded-xl p-2.5 text-xs font-bold bg-slate-50 outline-none">
+                        <input type="text" id="stdGroup" placeholder="المجموعة (مثال: أولي ثانوي)" required class="w-full border rounded-xl p-2.5 text-xs font-bold bg-slate-50 outline-none">
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs transition">حفظ الطالب تلقائياً ☁️</button>
+                </form>
+
+                <div id="allStudentsList" class="space-y-2"></div>
+            </section>
+        </main>
+    </section>
+
+    <!-- Script Application Logic -->
     <script>
-        // 🔗 بيانات مشروعك الخاصة بـ Supabase
         const SUPABASE_URL = "https://wboqplduhcwkpgffaqrh.supabase.co";
         const SUPABASE_KEY = "sb_publishable_6ZO3naWz7EAT5faaFP45VQ_MdgF9L94";
-
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        let currentTeacher = null;
         let students = [];
         let todayData = {};
         const todayDate = new Date().toISOString().split('T')[0];
 
-        async function loadData() {
-            try {
-                // 1. جلب الطلاب
-                const { data: stdData, error: stdErr } = await _supabase.from('students').select('*');
-                if (stdErr) throw stdErr;
-                students = stdData || [];
-
-                // 2. جلب سجل الحضور لليوم
-                const { data: attData, error: attErr } = await _supabase.from('attendance').select('*').eq('date', todayDate);
-                if (attErr) throw attErr;
-                
-                todayData = {};
-                (attData || []).forEach(row => {
-                    todayData[row.student_id] = row;
-                });
-
-                updateGroupsDropdown();
-                renderAll();
-            } catch (err) {
-                console.error("خطأ في جلب البيانات:", err);
+        // 1. معالجة وتنسيق رقم الموبايل (نزع الصفر الأول وإضافة كود مصر +20)
+        function formatEgyptianPhone(phoneRaw) {
+            let cleaned = (phoneRaw || '').toString().replace(/\D/g, '');
+            if (cleaned.startsWith('0')) {
+                cleaned = cleaned.substring(1);
             }
+            if (cleaned.startsWith('20')) {
+                return cleaned;
+            }
+            return '20' + cleaned;
+        }
+
+        // 2. التنقل بين الصفحات
+        function showPage(pageId) {
+            ['Landing', 'TeacherLogin', 'AdminLogin', 'AdminDashboard', 'TeacherDashboard'].forEach(p => {
+                document.getElementById('page' + p).classList.add('hidden');
+            });
+            document.getElementById('page' + pageId).classList.remove('hidden');
+            if (pageId === 'Landing') loadSettings();
+        }
+
+        // 3. السعر التلقائي
+        async function loadSettings() {
+            try {
+                const { data } = await _supabase.from('system_settings').select('value').eq('key', 'lifetime_price').maybeSingle();
+                document.getElementById('displayLifetimePrice').innerText = (data && data.value) ? data.value : "500";
+            } catch (e) {
+                document.getElementById('displayLifetimePrice').innerText = "500";
+            }
+        }
+
+        // 4. الأدمن
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            if (document.getElementById('adminPhone').value === '01094978855' && document.getElementById('adminPass').value === '14122007') {
+                showPage('AdminDashboard');
+                loadSettings();
+            } else {
+                const msg = document.getElementById('adminLoginMsg');
+                msg.innerText = 'بيانات الدخول غير صحيحة!';
+                msg.classList.remove('hidden');
+            }
+        }
+
+        async function saveLifetimePrice() {
+            const val = document.getElementById('inputLifetimePrice').value;
+            if(!val) return;
+            await _supabase.from('system_settings').upsert({ key: 'lifetime_price', value: val }, { onConflict: 'key' });
+            alert('تم حفظ وتحديث سعر الاشتراك في السيستم بنجاح!');
+            loadSettings();
+        }
+
+        async function addTeacherAccount(e) {
+            e.preventDefault();
+            const email = document.getElementById('newTeacherEmail').value;
+            const password = document.getElementById('newTeacherPass').value;
+            const { error } = await _supabase.auth.signUp({ email, password });
+            if (error) alert('خطأ: ' + error.message);
+            else { alert('تم إنشاء حساب المدرس بنجاح!'); e.target.reset(); }
+        }
+
+        function logoutAdmin() { showPage('Landing'); }
+
+        // 5. نظام المدرسين
+        async function handleTeacherLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('teacherEmail').value;
+            const password = document.getElementById('teacherPassword').value;
+            const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                const msg = document.getElementById('teacherLoginMsg');
+                msg.innerText = 'البريد أو كلمة السر غير صحيحة!';
+                msg.classList.remove('hidden');
+            } else {
+                currentTeacher = data.user;
+                document.getElementById('teacherBadge').innerText = currentTeacher.email;
+                showPage('TeacherDashboard');
+                loadTeacherData();
+                applyTemplate();
+            }
+        }
+
+        function logoutTeacher() {
+            _supabase.auth.signOut();
+            currentTeacher = null;
+            showPage('Landing');
+        }
+
+        async function loadTeacherData() {
+            const { data: stdData } = await _supabase.from('students').select('*').eq('teacher_id', currentTeacher.id);
+            students = stdData || [];
+
+            const { data: attData } = await _supabase.from('attendance').select('*').eq('date', todayDate);
+            todayData = {};
+            (attData || []).forEach(r => todayData[r.student_id] = r);
+
+            updateGroupsDropdown();
+            renderSessionList();
+            renderAllStudents();
         }
 
         async function addStudent(e) {
             e.preventDefault();
-            const newStudent = {
+            const rawPhone = document.getElementById('stdPhone').value;
+            const formattedPhone = formatEgyptianPhone(rawPhone);
+
+            const std = {
+                teacher_id: currentTeacher.id,
                 name: document.getElementById('stdName').value,
-                phone: document.getElementById('stdPhone').value.replace(/[^0-9]/g, ''),
-                group: document.getElementById('stdGroup').value,
-                fee: Number(document.getElementById('stdFee').value) || 0
+                phone: formattedPhone, // التخزين التلقائي بالكود الدولي
+                fee: Number(document.getElementById('stdFee').value) || 0,
+                group: document.getElementById('stdGroup').value
             };
 
-            const { error } = await _supabase.from('students').insert([newStudent]);
-            if(error) {
-                alert('حدث خطأ أثناء الحفظ! تأكد من أنك قمت بإنشاء الجداول في SQL Editor في لوحة Supabase.');
-                console.error(error);
-                return;
-            }
-
+            await _supabase.from('students').insert([std]);
             e.target.reset();
-            alert('تم حفظ الطالب أونلاين بنجاح!');
-            loadData();
+            loadTeacherData();
         }
 
         async function deleteStudent(id) {
-            if(confirm('هل تريد مسح الطالب؟')) {
+            if(confirm('هل أنت تأكد من حذف هذا الطالب؟')) {
                 await _supabase.from('students').delete().eq('id', id);
-                loadData();
+                loadTeacherData();
             }
         }
 
         async function toggleAttendance(studentId, status) {
             const current = todayData[studentId] || { student_id: studentId, status: null, paid: false, date: todayDate };
             current.status = status;
-            
             await _supabase.from('attendance').upsert([current], { onConflict: 'student_id,date' });
-            loadData();
+            loadTeacherData();
         }
 
         async function togglePaid(studentId) {
             const current = todayData[studentId] || { student_id: studentId, status: null, paid: false, date: todayDate };
             current.paid = !current.paid;
-
             await _supabase.from('attendance').upsert([current], { onConflict: 'student_id,date' });
-            loadData();
+            loadTeacherData();
         }
 
-        function switchTab(tab) {
-            document.getElementById('secSession').classList.toggle('hidden', tab !== 'session');
-            document.getElementById('secStudents').classList.toggle('hidden', tab !== 'students');
-            document.getElementById('tabSession').className = tab === 'session' ? 'flex-1 py-3 text-indigo-600 border-b-2 border-indigo-600' : 'flex-1 py-3 text-slate-500';
-            document.getElementById('tabStudents').className = tab === 'students' ? 'flex-1 py-3 text-indigo-600 border-b-2 border-indigo-600' : 'flex-1 py-3 text-slate-500';
+        function switchTeacherTab(tab) {
+            ['secSession', 'secBroadcast', 'secStudents'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            document.getElementById('sec' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.remove('hidden');
+            
+            ['tabSession', 'tabBroadcast', 'tabStudents'].forEach(t => {
+                document.getElementById(t).className = 'flex-1 py-3 text-slate-500';
+            });
+            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).className = 'flex-1 py-3 text-indigo-600 border-b-2 border-indigo-600';
         }
 
         function updateGroupsDropdown() {
             const groups = [...new Set(students.map(s => s.group))];
             const select = document.getElementById('sessionGroupSelect');
-            if(groups.length === 0) {
-                select.innerHTML = '<option>لا توجد مجموعات حالياً</option>';
-            } else {
-                select.innerHTML = groups.map(g => `<option value="${g}">${g}</option>`).join('');
-            }
+            select.innerHTML = groups.length 
+                ? groups.map(g => `<option value="${g}">${g}</option>`).join('') 
+                : '<option>لا توجد مجموعات حالياً</option>';
         }
 
-        function sendWhatsApp(phone, studentName, type) {
-            let msg = type === 'absent' ? 
-                `السلام عليكم ولي أمر الطالب/ة (${studentName})، نحيطكم علماً بغيابه اليوم عن الحصة.` :
-                `السلام عليكم ولي أمر الطالب/ة (${studentName})، نود تذكيركم بالمستحقات المتبقية للحصة.`;
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        // 6. إنشاء صيغ رسائل الواتساب الفردية لولي الأمر
+        function generateParentMessageText(student, state) {
+            const statusText = state.status === 'absent' ? '❌ غائب عن حصة اليوم' : (state.status === 'present' ? '✅ حاضر الحصة' : 'لم تتحدد الحضور بعد');
+            return `ولي الأمر المحترم،
+تحياتنا من نظام المدرس.
+نود إبلاغكم بأن الطالب(ة): ${student.name}
+📌 المجموعة: ${student.group}
+📌 الحالة اليوم: ${statusText}
+شاكرين حسن تعاونكم معنا.`;
+        }
+
+        function openSingleWhatsApp(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+            const state = todayData[student.id] || { status: null, paid: false };
+            const msg = generateParentMessageText(student, state);
+            window.open(`https://wa.me/${student.phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
         function renderSessionList() {
@@ -188,37 +414,34 @@
             const container = document.getElementById('sessionStudentsList');
             container.innerHTML = '';
 
-            if (groupStudents.length === 0) {
+            if (!groupStudents.length) {
                 container.innerHTML = `<p class="text-center text-xs text-slate-400 py-6">لا يوجد طلاب في هذه المجموعة</p>`;
                 return;
             }
 
-            let presentCount = 0, absentCount = 0, unpaidCount = 0, totalCash = 0;
+            let totalCash = 0;
 
             groupStudents.forEach(s => {
                 const state = todayData[s.id] || { status: null, paid: false };
-                if(state.status === 'present') presentCount++;
-                if(state.status === 'absent') absentCount++;
-                if(state.paid) totalCash += s.fee;
-                if(!state.paid && state.status === 'present') unpaidCount++;
+                if (state.paid) totalCash += s.fee;
 
                 container.innerHTML += `
                     <div class="bg-white border rounded-2xl p-3 shadow-sm flex flex-col gap-2">
                         <div class="flex justify-between items-center">
                             <div>
                                 <h4 class="font-bold text-xs text-slate-800">${s.name}</h4>
-                                <span class="text-[10px] text-slate-400">💰 ${s.fee} ج.م</span>
+                                <span class="text-[10px] text-slate-400">💰 ${s.fee} ج.م • 📞 +${s.phone}</span>
                             </div>
-                            <button onclick="sendWhatsApp('${s.phone}', '${s.name}', 'absent')" class="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-1 rounded-lg border border-emerald-200 font-bold">💬 واتساب</button>
+                            <button onclick="openSingleWhatsApp(${s.id})" class="text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-lg border border-emerald-200 font-bold transition">💬 واتساب ولي الأمر</button>
                         </div>
                         <div class="grid grid-cols-3 gap-2 text-xs font-bold pt-1 border-t">
-                            <button onclick="toggleAttendance(${s.id}, 'present')" class="py-1.5 rounded-xl ${state.status === 'present' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'}">
+                            <button onclick="toggleAttendance(${s.id}, 'present')" class="py-1.5 rounded-xl transition ${state.status === 'present' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'}">
                                 ${state.status === 'present' ? '✅ حضر' : 'حضر'}
                             </button>
-                            <button onclick="toggleAttendance(${s.id}, 'absent')" class="py-1.5 rounded-xl ${state.status === 'absent' ? 'bg-red-600 text-white' : 'bg-slate-100 text-slate-600'}">
+                            <button onclick="toggleAttendance(${s.id}, 'absent')" class="py-1.5 rounded-xl transition ${state.status === 'absent' ? 'bg-red-600 text-white' : 'bg-slate-100 text-slate-600'}">
                                 ${state.status === 'absent' ? '❌ غاب' : 'غاب'}
                             </button>
-                            <button onclick="togglePaid(${s.id})" class="py-1.5 rounded-xl ${state.paid ? 'bg-indigo-600 text-white' : 'bg-amber-100 text-amber-800'}">
+                            <button onclick="togglePaid(${s.id})" class="py-1.5 rounded-xl transition ${state.paid ? 'bg-indigo-600 text-white' : 'bg-amber-100 text-amber-800'}">
                                 ${state.paid ? '💵 دفع' : 'لم يدفع'}
                             </button>
                         </div>
@@ -226,27 +449,68 @@
                 `;
             });
 
-            document.getElementById('countPresent').innerText = presentCount;
-            document.getElementById('countAbsent').innerText = absentCount;
-            document.getElementById('countUnpaid').innerText = unpaidCount;
             document.getElementById('todayTotal').innerText = totalCash.toLocaleString('ar-EG') + ' ج.م';
         }
 
-        function renderAll() {
-            document.getElementById('allStudentsList').innerHTML = students.map(s => `
-                <div class="bg-white border p-3 rounded-xl flex justify-between items-center text-xs">
-                    <div>
-                        <p class="font-bold text-slate-800">${s.name}</p>
-                        <p class="text-[10px] text-slate-400">${s.group} • 📞 ${s.phone}</p>
-                    </div>
-                    <button onclick="deleteStudent(${s.id})" class="text-red-500 font-bold px-2">مسح</button>
-                </div>
-            `).join('');
+        // 7. القوالب والإرسال الجماعي
+        const templates = {
+            absent: `السيد ولي الأمر المحترم،
+نحيطكم علماً بأن ابنكم/ابنتكم {student_name} غائب اليوم عن حصة {group_name}.
+يرجى المتابعة والحرص على الحضور.`,
+            attendance: `السيد ولي الأمر المحترم،
+نتشرف بإبلاغكم أن الطالب(ة) {student_name} حضر حصة اليوم في مجموعة {group_name} وتميز في المشاركة.`,
+            payment: `السيد ولي الأمر المحترم،
+تذكير لطيف بخصوص المصروفات الدراسية الخاصة بالطالب(ة) {student_name} بمجموعة {group_name}.`
+        };
 
-            renderSessionList();
+        function applyTemplate() {
+            const key = document.getElementById('templateSelect').value;
+            document.getElementById('broadcastText').value = templates[key] || '';
         }
 
-        loadData();
+        function sendBulkMessages() {
+            const selectedGroup = document.getElementById('sessionGroupSelect').value;
+            const groupStudents = students.filter(s => s.group === selectedGroup);
+
+            if (!groupStudents.length) {
+                alert('لا يوجد طلاب في المجموعة الحالية للإرسال!');
+                return;
+            }
+
+            const rawTemplate = document.getElementById('broadcastText').value;
+
+            // إرسال يفتح الواتساب بالترتيب لأولياء الأمور
+            groupStudents.forEach((s, idx) => {
+                const state = todayData[s.id] || { status: null, paid: false };
+                const statusTxt = state.status === 'absent' ? 'غائب' : (state.status === 'present' ? 'حاضر' : 'مستمر');
+                
+                let message = rawTemplate
+                    .replace(/{parent_name}/g, 'ولي الأمر المحترم')
+                    .replace(/{student_name}/g, s.name)
+                    .replace(/{group_name}/g, s.group)
+                    .replace(/{status}/g, statusTxt);
+
+                setTimeout(() => {
+                    window.open(`https://wa.me/${s.phone}?text=${encodeURIComponent(message)}`, '_blank');
+                }, idx * 1200); // الفاصل الزمني لتجنب الحظر
+            });
+        }
+
+        function renderAllStudents() {
+            const container = document.getElementById('allStudentsList');
+            container.innerHTML = students.map(s => `
+                <div class="bg-white border p-3 rounded-xl flex justify-between items-center text-xs shadow-sm">
+                    <div>
+                        <p class="font-bold text-slate-800">${s.name}</p>
+                        <p class="text-[10px] text-slate-400">${s.group} • 📞 +${s.phone}</p>
+                    </div>
+                    <button onclick="deleteStudent(${s.id})" class="text-red-500 font-bold hover:bg-red-50 px-2 py-1 rounded-lg">مسح</button>
+                </div>
+            `).join('');
+        }
+
+        // تشغيل البداية
+        showPage('Landing');
     </script>
 </body>
 </html>
