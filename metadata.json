@@ -1,0 +1,6 @@
+{
+  "name": "Smart Campus - معهد الفراعنة العالي",
+  "description": "منصة تعليمية متكاملة لطلاب معهد الفراعنة العالي للحاسب ونظم المعلومات والإدارة: محتوى المحاضرات، أكواد التفعيل، إشعارات تيليجرام وويب بوش، ولوحة إدارة متكاملة.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
