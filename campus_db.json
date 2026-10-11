@@ -1,0 +1,765 @@
+{
+  "settings": {
+    "campusName": " معهد الفراعنة العالي",
+    "campusShortName": "معهد الفراعنة العالي",
+    "description": "المنصة الطلابية التعليمية المتكاملة لطلاب معهد الفراعنة العالي للحاسب ونظم المعلومات والإدارة",
+    "logoUrl": "/icon.svg",
+    "primaryColor": "#1e3a8a",
+    "accentColor": "#0d9488",
+    "paymentMethods": {
+      "vodafoneCash": {
+        "enabled": true,
+        "number": "01557688524",
+        "instructions": "حوّل قيمة الاشتراك عبر فودافون كاش ثم أرسل صورة التحويل عبر واتساب للحصول على كود التفعيل الفوري."
+      },
+      "instaPay": {
+        "enabled": true,
+        "username": "",
+        "instructions": "حوّل مباشرة عبر تطبيق انستا باي مع كتابة اسم الطالب ورقم هاتفه في خانة البيان."
+      },
+      "fawry": {
+        "enabled": true,
+        "serviceCode": "78910",
+        "instructions": "ادفع من أي ماكينة فوري باستخدام كود الخدمة واحتفظ بإيصال الدفع."
+      },
+      "bankTransfer": {
+        "enabled": false,
+        "details": "البنك الأهلي المصري - حساب معهد الفراعنة العالي رقم 12345678901234",
+        "instructions": "التحويل البنكي متاح للاشتراكات السنوية فقط."
+      }
+    },
+    "supportContact": {
+      "whatsapp": "01012345678",
+      "phone": "01012345678",
+      "telegram": "PharaohsCampusSupport",
+      "email": "support@pharaohs.edu.eg"
+    },
+    "subscriptionPricePerTerm": 100,
+    "subscriptionPriceYearly": 250,
+    "registrationOpen": true,
+    "autoNotificationsEnabled": true,
+    "privacyPolicy": "نلتزم بحماية خصوصية بيانات طلاب معهد الفراعنة العالي وعدم مشاركتها مع أي طرف ثالث.",
+    "termsOfService": "الحساب شخصي وخاص بالطالب المسجل فقط في معهد الفراعنة العالي، ويمنع مشاركة أكواد التفعيل."
+  },
+  "institutions": [
+    {
+      "id": "inst-1",
+      "name": "معهد الفراعنة العالي للحاسب ونظم المعلومات والإدارة",
+      "slug": "pharaohs-institute",
+      "logoUrl": "/icon.svg",
+      "isActive": true
+    },
+    {
+      "id": "inst-2",
+      "name": "معهد الفراعنة العالي - شعبة العلوم التجارية",
+      "slug": "pharaohs-commerce",
+      "logoUrl": "/icon.svg",
+      "isActive": true
+    }
+  ],
+  "departments": [
+    {
+      "id": "dept-1",
+      "institutionId": "inst-1",
+      "name": "شعبة نظم معلومات إدارية (MIS)",
+      "slug": "mis",
+      "code": "MIS",
+      "isActive": true
+    },
+    {
+      "id": "dept-2",
+      "institutionId": "inst-1",
+      "name": "شعبة علوم الحاسب (CS)",
+      "slug": "cs",
+      "code": "CS",
+      "isActive": true
+    },
+    {
+      "id": "dept-3",
+      "institutionId": "inst-1",
+      "name": "شعبة إدارة الأعمال والمحاسبة",
+      "slug": "business-accounting",
+      "code": "ACC",
+      "isActive": true
+    }
+  ],
+  "academicYears": [
+    {
+      "id": "year-1",
+      "departmentId": "dept-1",
+      "name": "الفرقة الأولى",
+      "yearNumber": 1,
+      "term": "second",
+      "isActive": true
+    },
+    {
+      "id": "year-2",
+      "departmentId": "dept-1",
+      "name": "الفرقة الثانية",
+      "yearNumber": 2,
+      "term": "second",
+      "isActive": true
+    },
+    {
+      "id": "year-3",
+      "departmentId": "dept-1",
+      "name": "الفرقة الثالثة",
+      "yearNumber": 3,
+      "term": "second",
+      "isActive": true
+    },
+    {
+      "id": "year-4",
+      "departmentId": "dept-1",
+      "name": "الفرقة الرابعة",
+      "yearNumber": 4,
+      "term": "second",
+      "isActive": true
+    }
+  ],
+  "professors": [
+    {
+      "id": "prof-1",
+      "name": "أ.د. أحمد منصور",
+      "title": "أستاذ دكتور",
+      "bio": "رئيس قسم نظم المعلومات - خبير قواعد البيانات وتحليل النظم",
+      "email": "a.mansour@hitmi.edu.eg",
+      "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "prof-2",
+      "name": "د. سارة عبد الرحمن",
+      "title": "دكتورة",
+      "bio": "مدرس علوم الحاسب وهندسة البرمجيات وتطبيقات الويب",
+      "email": "s.abdelrahman@hitmi.edu.eg",
+      "avatarUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "prof-3",
+      "name": "د. محمود الشريف",
+      "title": "دكتور",
+      "bio": "مدرس المحاسبة المالية والتكاليف ونظم الرقابة",
+      "email": "m.elsherif@hitmi.edu.eg",
+      "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "prof-4",
+      "name": "د. نهى فؤاد",
+      "title": "دكتورة",
+      "bio": "مدرس شبكات الحاسب وأمن المعلومات",
+      "email": "n.fouad@hitmi.edu.eg",
+      "avatarUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80"
+    }
+  ],
+  "subjects": [
+    {
+      "id": "sub-1",
+      "academicYearId": "year-3",
+      "name": "قواعد البيانات المتقدمة",
+      "code": "MIS-301",
+      "creditHours": 3,
+      "icon": "database",
+      "isActive": true
+    },
+    {
+      "id": "sub-2",
+      "academicYearId": "year-3",
+      "name": "تطوير تطبيقات الويب والخدمات السحابية",
+      "code": "MIS-302",
+      "creditHours": 3,
+      "icon": "code",
+      "isActive": true
+    },
+    {
+      "id": "sub-3",
+      "academicYearId": "year-3",
+      "name": "تحليل وتصميم النظم والـ UML",
+      "code": "MIS-303",
+      "creditHours": 3,
+      "icon": "layout",
+      "isActive": true
+    },
+    {
+      "id": "sub-4",
+      "academicYearId": "year-3",
+      "name": "محاسبة التكاليف الإلكترونية",
+      "code": "ACC-304",
+      "creditHours": 3,
+      "icon": "calculator",
+      "isActive": true
+    },
+    {
+      "id": "sub-5",
+      "academicYearId": "year-3",
+      "name": "أمن المعلومات والشبكات الذكية",
+      "code": "NET-305",
+      "creditHours": 3,
+      "icon": "shield",
+      "isActive": true
+    }
+  ],
+  "subjectProfessors": [
+    {
+      "id": "sp-1",
+      "subjectId": "sub-1",
+      "professorId": "prof-1",
+      "isPrimary": true
+    },
+    {
+      "id": "sp-2",
+      "subjectId": "sub-2",
+      "professorId": "prof-2",
+      "isPrimary": true
+    },
+    {
+      "id": "sp-3",
+      "subjectId": "sub-3",
+      "professorId": "prof-1",
+      "isPrimary": true
+    },
+    {
+      "id": "sp-4",
+      "subjectId": "sub-4",
+      "professorId": "prof-3",
+      "isPrimary": true
+    },
+    {
+      "id": "sp-5",
+      "subjectId": "sub-5",
+      "professorId": "prof-4",
+      "isPrimary": true
+    }
+  ],
+  "lectures": [
+    {
+      "id": "lec-1",
+      "subjectId": "sub-1",
+      "professorId": "prof-1",
+      "lectureNumber": 1,
+      "title": "مقدمة في نمذجة البيانات العلائقية ومخطط ERD المتقدم",
+      "description": "شرح مفصل لمفاهيم Entity-Relationship Diagram والتحويل إلى جداول مع تدريبات عملية.",
+      "publishedAt": "2026-10-01T09:00:00Z",
+      "isPublished": true,
+      "createdAt": "2026-10-01T08:30:00Z"
+    },
+    {
+      "id": "lec-2",
+      "subjectId": "sub-1",
+      "professorId": "prof-1",
+      "lectureNumber": 2,
+      "title": "معايير تسوية قواعد البيانات (Normalization 1NF, 2NF, 3NF)",
+      "description": "كيفية تجنب التكرار والشذوذ في البيانات وتصميم جداول متماسكة.",
+      "publishedAt": "2026-10-08T09:00:00Z",
+      "isPublished": true,
+      "createdAt": "2026-10-08T08:30:00Z"
+    },
+    {
+      "id": "lec-3",
+      "subjectId": "sub-2",
+      "professorId": "prof-2",
+      "lectureNumber": 1,
+      "title": "بناء واجهات API الحديثة وتكامل RESTful Architecture",
+      "description": "أساسيات الاتصال بين السيرفر والواجهة، ومعالجة الطلبات والحماية.",
+      "publishedAt": "2026-10-03T11:00:00Z",
+      "isPublished": true,
+      "createdAt": "2026-10-03T10:30:00Z"
+    },
+    {
+      "id": "lec-4",
+      "subjectId": "sub-3",
+      "professorId": "prof-1",
+      "lectureNumber": 1,
+      "title": "مراحل دورة حياة تطوير النظم (SDLC) ومخططات Use Case",
+      "description": "تحديد متطلبات النظام والمستخدمين ورسم مخططات حالات الاستخدام.",
+      "publishedAt": "2026-10-05T13:00:00Z",
+      "isPublished": true,
+      "createdAt": "2026-10-05T12:00:00Z"
+    }
+  ],
+  "lectureResources": [
+    {
+      "id": "res-1",
+      "lectureId": "lec-1",
+      "title": "ملف الشرح الكامل (PDF)",
+      "resourceType": "pdf",
+      "driveUrl": "https://drive.google.com/file/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs/view?usp=sharing",
+      "fileSize": "4.8 MB",
+      "sortOrder": 1,
+      "createdAt": "2026-10-01T08:35:00Z"
+    },
+    {
+      "id": "res-2",
+      "lectureId": "lec-1",
+      "title": "التسجيل الصوتي للمحاضرة كاملة",
+      "resourceType": "audio",
+      "driveUrl": "https://drive.google.com/file/d/1demo_audio_lecture_01/view?usp=sharing",
+      "fileSize": "32.1 MB",
+      "sortOrder": 2,
+      "createdAt": "2026-10-01T08:36:00Z"
+    },
+    {
+      "id": "res-3",
+      "lectureId": "lec-1",
+      "title": "ملخص النقاط الجوهرية وأسئلة الامتحانات السابقة",
+      "resourceType": "summary",
+      "driveUrl": "https://drive.google.com/file/d/1demo_summary_notes_01/view?usp=sharing",
+      "fileSize": "1.2 MB",
+      "sortOrder": 3,
+      "createdAt": "2026-10-01T08:37:00Z"
+    },
+    {
+      "id": "res-4",
+      "lectureId": "lec-2",
+      "title": "سلايدات المحاضرة الثانية - Normalization (PDF)",
+      "resourceType": "pdf",
+      "driveUrl": "https://drive.google.com/file/d/1demo_normalization_slides/view?usp=sharing",
+      "fileSize": "3.5 MB",
+      "sortOrder": 1,
+      "createdAt": "2026-10-08T08:35:00Z"
+    },
+    {
+      "id": "res-5",
+      "lectureId": "lec-3",
+      "title": "أكواد عملية لمشروع REST API (ZIP / Drive)",
+      "resourceType": "assignment",
+      "driveUrl": "https://drive.google.com/file/d/1demo_rest_api_code/view?usp=sharing",
+      "fileSize": "8.4 MB",
+      "sortOrder": 1,
+      "createdAt": "2026-10-03T10:35:00Z"
+    }
+  ],
+  "announcements": [
+    {
+      "id": "ann-1",
+      "title": "تنبيه عاجل: مواعيد تسليم التكليف العملي لمادة قواعد البيانات",
+      "content": "يرجى من جميع طلاب الفرقة الثالثة رفع التكليف الأول على المنصة قبل نهاية الأسبوع القادم يوم الخميس في تمام الساعة 11:59 مساءً.",
+      "priority": "urgent",
+      "isPinned": true,
+      "targetType": "academic_year",
+      "targetId": "year-3",
+      "targetName": "الفرقة الثالثة - نظم معلومات إدارية",
+      "isPublished": true,
+      "publishedAt": "2026-10-10T10:00:00Z",
+      "createdAt": "2026-10-10T09:30:00Z"
+    },
+    {
+      "id": "ann-2",
+      "title": "جدول امتحانات منتصف الفصل الدراسي الثاني (الميدتيرم)",
+      "content": "تم اعتماد جدول امتحانات الميدتيرم للعام الجامعي وسيبدأ أول امتحان في 25 أكتوبر. يرجى مراجعة صفحة المواعيد في المنصة.",
+      "priority": "high",
+      "isPinned": false,
+      "targetType": "all",
+      "isPublished": true,
+      "publishedAt": "2026-10-09T14:00:00Z",
+      "createdAt": "2026-10-09T13:45:00Z"
+    }
+  ],
+  "events": [
+    {
+      "id": "evt-1",
+      "title": "محاضرة قواعد البيانات المتقدمة (أ.د. أحمد منصور)",
+      "description": "شرح معايير تسوية قواعد البيانات والـ BCNF في المدرج الرئيسي (قاعة 402)",
+      "eventType": "lecture",
+      "eventDate": "2026-10-12",
+      "startTime": "10:00",
+      "endTime": "12:00",
+      "locationOrLink": "مدرج 402 - مبنى التكنولوجيا",
+      "targetType": "academic_year",
+      "targetId": "year-3",
+      "isCancelled": false,
+      "createdAt": "2026-10-05T10:00:00Z"
+    },
+    {
+      "id": "evt-2",
+      "title": "سكشن عملي: تصميم واجهات الويب وReact",
+      "description": "تطبيق عملي في معمل الحاسب رقم 3 مع المهندس المعيد",
+      "eventType": "section",
+      "eventDate": "2026-10-13",
+      "startTime": "12:30",
+      "endTime": "14:00",
+      "locationOrLink": "معمل حاسب 3",
+      "targetType": "academic_year",
+      "targetId": "year-3",
+      "isCancelled": false,
+      "createdAt": "2026-10-05T10:00:00Z"
+    },
+    {
+      "id": "evt-3",
+      "title": "تسليم التكليف العملي الأول لنظم المعلومات",
+      "description": "آخر موعد لرفع التكليف واستلام الدرجات",
+      "eventType": "assignment",
+      "eventDate": "2026-10-15",
+      "startTime": "23:59",
+      "endTime": "23:59",
+      "locationOrLink": "بوابة التكليفات",
+      "targetType": "academic_year",
+      "targetId": "year-3",
+      "isCancelled": false,
+      "createdAt": "2026-10-05T10:00:00Z"
+    }
+  ],
+  "subscriptionPlans": [
+    {
+      "id": "plan-term",
+      "name": "اشتراك الفصل الدراسي (ترم كامل)",
+      "durationType": "term",
+      "durationDays": 120,
+      "priceEgp": 150,
+      "description": "وصول شامل لجميع محاضرات وملخصات وتسجيلات الفصل الدراسي الحالي.",
+      "isActive": true
+    },
+    {
+      "id": "plan-year",
+      "name": "اشتراك العام الجامعي الكامل",
+      "durationType": "yearly",
+      "durationDays": 300,
+      "priceEgp": 250,
+      "description": "اشتراك سنوي يشمل الفصلين الدراسيين الأول والثاني مع التحديثات والإشعارات.",
+      "isActive": true
+    },
+    {
+      "id": "plan-perm",
+      "name": "تفعيل دائم (VIP)",
+      "durationType": "permanent",
+      "durationDays": 0,
+      "priceEgp": 450,
+      "description": "وصول دائم لكافة السنوات والمواد بدون الحاجة للتجديد.",
+      "isActive": true
+    }
+  ],
+  "activationCodes": [
+    {
+      "id": "code-1791740761195-1",
+      "code": "PHARAOHS-3703-3WG7",
+      "planId": "plan-term",
+      "planName": "اشتراك الفصل الدراسي (ترم كامل)",
+      "durationDays": 0,
+      "status": "available",
+      "createdBy": "admin-1",
+      "createdByName": "المهندس كريم الشاذلي (إدارة المنصة)",
+      "createdAt": "2026-10-11T17:46:01.195Z"
+    },
+    {
+      "id": "code-1791740761195-0",
+      "code": "PHARAOHS-4078-LXB8",
+      "planId": "plan-term",
+      "planName": "اشتراك الفصل الدراسي (ترم كامل)",
+      "durationDays": 0,
+      "status": "available",
+      "createdBy": "admin-1",
+      "createdByName": "المهندس كريم الشاذلي (إدارة المنصة)",
+      "createdAt": "2026-10-11T17:46:01.195Z"
+    },
+    {
+      "id": "code-1",
+      "code": "CAMPUS-2026-TERM",
+      "planId": "plan-term",
+      "planName": "اشتراك الفصل الدراسي",
+      "durationDays": 120,
+      "status": "used",
+      "createdBy": "admin-1",
+      "createdByName": "مدير النظام",
+      "createdAt": "2026-10-01T10:00:00Z",
+      "usedBy": "student-active-1",
+      "usedByName": "أحمد إبراهيم علي",
+      "usedAt": "2026-10-11T18:26:51.992Z"
+    },
+    {
+      "id": "code-2",
+      "code": "VIP-SUCCESS-YEAR",
+      "planId": "plan-year",
+      "planName": "اشتراك العام الكامل",
+      "durationDays": 300,
+      "status": "used",
+      "createdBy": "admin-1",
+      "createdByName": "مدير النظام",
+      "createdAt": "2026-10-01T10:00:00Z",
+      "usedBy": "student-pending-1",
+      "usedByName": "محمد يوسف حسام",
+      "usedAt": "2026-10-11T18:27:08.605Z"
+    },
+    {
+      "id": "code-3",
+      "code": "TEST-PERMANENT-99",
+      "planId": "plan-perm",
+      "planName": "تفعيل دائم",
+      "durationDays": 0,
+      "status": "available",
+      "createdBy": "admin-1",
+      "createdByName": "مدير النظام",
+      "createdAt": "2026-10-01T10:00:00Z"
+    },
+    {
+      "id": "code-4",
+      "code": "USED-SAMPLE-1234",
+      "planId": "plan-term",
+      "planName": "اشتراك الفصل الدراسي",
+      "durationDays": 120,
+      "status": "used",
+      "createdBy": "admin-1",
+      "usedBy": "student-active-1",
+      "usedByName": "أحمد إبراهيم علي",
+      "usedAt": "2026-10-05T12:00:00Z",
+      "createdAt": "2026-10-01T10:00:00Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "admin-1",
+      "fullName": "المهندس كريم الشاذلي (إدارة المنصة)",
+      "phone": "01099887766",
+      "email": "admin@pharaohs.edu.eg",
+      "role": "super_admin",
+      "status": "active",
+      "institutionId": "inst-1",
+      "institutionName": "معهد الفراعنة العالي",
+      "departmentId": "dept-admin",
+      "departmentName": "الإدارة المركزية والدعم الأكاديمي",
+      "academicYearId": "admin-level",
+      "academicYearName": "لوحة التحكم الإدارية",
+      "onboardingCompleted": true,
+      "subscriptionExpiresAt": "2099-12-31T23:59:59Z",
+      "telegramLinked": true,
+      "telegramUsername": "KarimAdmin",
+      "webPushEnabled": true,
+      "createdAt": "2026-09-01T10:00:00Z"
+    },
+    {
+      "id": "student-active-1",
+      "fullName": "أحمد إبراهيم علي",
+      "phone": "01011223344",
+      "email": "ahmed.ibrahim@pharaohs.edu.eg",
+      "role": "student",
+      "status": "active",
+      "institutionId": "inst-1",
+      "institutionName": "معهد الفراعنة العالي",
+      "departmentId": "dept-1",
+      "departmentName": "شعبة نظم معلومات إدارية (MIS)",
+      "academicYearId": "year-3",
+      "academicYearName": "الفرقة الثالثة",
+      "onboardingCompleted": true,
+      "subscriptionExpiresAt": "2027-06-15T23:59:59.000Z",
+      "telegramLinked": true,
+      "telegramUsername": "AhmedStudent_Eg",
+      "webPushEnabled": true,
+      "createdAt": "2026-10-02T11:00:00Z"
+    },
+    {
+      "id": "student-pending-1",
+      "fullName": "محمد يوسف حسام",
+      "phone": "01234567890",
+      "email": "mohamed.youssef@pharaohs.edu.eg",
+      "role": "student",
+      "status": "active",
+      "institutionId": "inst-1",
+      "institutionName": "معهد الفراعنة العالي",
+      "departmentId": "dept-1",
+      "departmentName": "شعبة نظم معلومات إدارية (MIS)",
+      "academicYearId": "year-3",
+      "academicYearName": "الفرقة الثالثة",
+      "onboardingCompleted": false,
+      "subscriptionExpiresAt": "2027-08-07T18:27:08.605Z",
+      "telegramLinked": true,
+      "webPushEnabled": false,
+      "createdAt": "2026-10-10T14:00:00Z"
+    }
+  ],
+  "studentSubjects": [
+    {
+      "studentId": "student-active-1",
+      "subjectId": "sub-1",
+      "professorId": "prof-1"
+    },
+    {
+      "studentId": "student-active-1",
+      "subjectId": "sub-2",
+      "professorId": "prof-2"
+    },
+    {
+      "studentId": "student-active-1",
+      "subjectId": "sub-3",
+      "professorId": "prof-1"
+    },
+    {
+      "studentId": "student-active-1",
+      "subjectId": "sub-4",
+      "professorId": "prof-3"
+    },
+    {
+      "studentId": "student-active-1",
+      "subjectId": "sub-5",
+      "professorId": "prof-4"
+    },
+    {
+      "studentId": "admin-1",
+      "subjectId": "sub-1",
+      "professorId": "prof-1"
+    },
+    {
+      "studentId": "admin-1",
+      "subjectId": "sub-2",
+      "professorId": "prof-2"
+    }
+  ],
+  "subscriptions": [
+    {
+      "id": "sub-record-1",
+      "studentId": "student-active-1",
+      "codeId": "code-4",
+      "planId": "plan-term",
+      "startedAt": "2026-10-05T12:00:00Z",
+      "expiresAt": "2027-02-15T23:59:59Z",
+      "status": "active"
+    },
+    {
+      "id": "sub-1791743211992",
+      "studentId": "student-active-1",
+      "codeId": "code-1",
+      "planId": "plan-term",
+      "startedAt": "2026-10-11T18:26:51.992Z",
+      "expiresAt": "2027-06-15T23:59:59.000Z",
+      "status": "active"
+    },
+    {
+      "id": "sub-1791743228605",
+      "studentId": "student-pending-1",
+      "codeId": "code-2",
+      "planId": "plan-year",
+      "startedAt": "2026-10-11T18:27:08.605Z",
+      "expiresAt": "2027-08-07T18:27:08.605Z",
+      "status": "active"
+    }
+  ],
+  "telegramConnections": [
+    {
+      "studentId": "student-active-1",
+      "telegramUserId": "987654321",
+      "telegramUsername": "AhmedStudent_Eg",
+      "isLinked": true,
+      "linkedAt": "2026-10-05T12:30:00Z",
+      "lastDeliveryStatus": "delivered",
+      "studentName": "أحمد إبراهيم علي",
+      "studentPhone": "01011223344",
+      "activationCode": "CAMPUS-2026-TERM",
+      "planName": "اشتراك الفصل الدراسي",
+      "activatedAt": "2026-10-11T18:26:51.992Z",
+      "autoRegistered": true,
+      "academicYearName": "الفرقة الثالثة",
+      "departmentName": "شعبة نظم معلومات إدارية (MIS)"
+    },
+    {
+      "studentId": "admin-1",
+      "telegramUserId": "123456789",
+      "telegramUsername": "KarimAdmin",
+      "isLinked": true,
+      "linkedAt": "2026-09-02T10:00:00Z",
+      "lastDeliveryStatus": "delivered"
+    },
+    {
+      "studentId": "student-pending-1",
+      "studentName": "محمد يوسف حسام",
+      "studentPhone": "01234567890",
+      "isLinked": true,
+      "telegramUserId": null,
+      "telegramUsername": null,
+      "activationCode": "VIP-SUCCESS-YEAR",
+      "planName": "اشتراك العام الكامل",
+      "activatedAt": "2026-10-11T18:27:08.605Z",
+      "linkedAt": "2026-10-11T18:27:08.605Z",
+      "lastDeliveryStatus": "delivered",
+      "autoRegistered": true,
+      "academicYearName": "الفرقة الثالثة",
+      "departmentName": "شعبة نظم معلومات إدارية (MIS)"
+    }
+  ],
+  "pushSubscriptions": [
+    {
+      "studentId": "student-active-1",
+      "endpoint": "https://fcm.googleapis.com/fcm/send/sample-endpoint-ahmed",
+      "keysP256dh": "sample-p256dh-key",
+      "keysAuth": "sample-auth-key",
+      "deviceName": "Chrome on Android",
+      "createdAt": "2026-10-05T12:35:00Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "broadcast-1791740785194",
+      "title": "we",
+      "content": "wwwww",
+      "type": "admin_alert",
+      "targetUrl": "/announcements",
+      "createdAt": "2026-10-11T17:46:25.194Z"
+    },
+    {
+      "id": "notif-1",
+      "title": "محاضرة جديدة: قواعد البيانات المتقدمة",
+      "content": "أضاف أ.د. أحمد منصور المحاضرة الثانية: معايير تسوية قواعد البيانات وملفات الشرح.",
+      "type": "new_lecture",
+      "targetUrl": "/subjects/sub-1",
+      "createdAt": "2026-10-08T09:05:00Z"
+    },
+    {
+      "id": "notif-2",
+      "title": "تنبيه إداري: مواعيد تسليم التكليفات",
+      "content": "يرجى الالتزام بموعد تسليم التكليف العملي قبل انتهاء المهلة المحددة.",
+      "type": "admin_alert",
+      "targetUrl": "/announcements",
+      "createdAt": "2026-10-10T10:05:00Z"
+    },
+    {
+      "id": "notif-act-1791743211993",
+      "title": "🎉 تهانينا! تم تفعيل حسابك وتسجيل رقمك بالبوت تلقائياً",
+      "content": "تم تفعيل اشتراكك في المنصة حتى ١٥‏/٦‏/٢٠٢٧، وتم تسجيل رقم هاتفك (01011223344) تلقائياً في بوت تيليجرام المعهد لإرسال المحاضرات والتنبيهات.",
+      "type": "subscription_alert",
+      "targetUrl": "/subjects",
+      "createdAt": "2026-10-11T18:26:51.999Z"
+    }
+  ],
+  "notificationRecipients": [
+    {
+      "id": "nr-1",
+      "notificationId": "notif-1",
+      "studentId": "student-active-1",
+      "isRead": true
+    },
+    {
+      "id": "nr-2",
+      "notificationId": "notif-2",
+      "studentId": "student-active-1",
+      "isRead": true
+    },
+    {
+      "id": "nr-bc-1791740785194-student-active-1",
+      "notificationId": "broadcast-1791740785194",
+      "studentId": "student-active-1",
+      "isRead": true
+    },
+    {
+      "id": "nr-bc-1791740785194-student-pending-1",
+      "notificationId": "broadcast-1791740785194",
+      "studentId": "student-pending-1",
+      "isRead": false
+    },
+    {
+      "id": "nr-1791743211999",
+      "notificationId": "notif-act-1791743211993",
+      "studentId": "student-active-1",
+      "isRead": false
+    }
+  ],
+  "notificationPreferences": [
+    {
+      "studentId": "student-active-1",
+      "lecturesEnabled": true,
+      "resourcesEnabled": true,
+      "announcementsEnabled": true,
+      "eventsEnabled": true,
+      "subscriptionsEnabled": true,
+      "telegramEnabled": true,
+      "webPushEnabled": true,
+      "subjectOverrides": {}
+    }
+  ],
+  "notificationJobs": []
+}

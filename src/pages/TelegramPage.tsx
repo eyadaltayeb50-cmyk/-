@@ -161,20 +161,30 @@ export const TelegramPage: React.FC = () => {
           <div className="space-y-4">
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
               <div className="flex items-center justify-between text-slate-700">
+                <span>رقم الهاتف المسجل في البوت:</span>
+                <span className="font-mono text-slate-900 font-bold" dir="ltr">
+                  {status.studentPhone || user?.phone || '01012345678'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-slate-700">
+                <span>طريقة التسجيل بالبوت:</span>
+                <span className="text-emerald-700 font-bold">تسجيل تلقائي فور تفعيل كود الاشتراك ✅</span>
+              </div>
+              <div className="flex items-center justify-between text-slate-700">
                 <span>اسم المستخدم في تيليجرام:</span>
                 <span className="font-mono text-sky-700 font-bold" dir="ltr">
                   @{status.telegramUsername || user?.telegramUsername || 'PharaohsStudent'}
                 </span>
               </div>
               <div className="flex items-center justify-between text-slate-700">
-                <span>تاريخ الربط:</span>
+                <span>تاريخ التفعيل والربط:</span>
                 <span className="text-slate-500">
                   {status.linkedAt ? new Date(status.linkedAt).toLocaleDateString('ar-EG') : 'حديثاً'}
                 </span>
               </div>
               <div className="flex items-center justify-between text-slate-700">
-                <span>حالة التسليم الأخيرة:</span>
-                <span className="text-emerald-700 font-bold">ناجح (Delivered)</span>
+                <span>حالة التسليم وتلقي المحاضرات:</span>
+                <span className="text-emerald-700 font-bold">مفعل ونشط (Delivered)</span>
               </div>
             </div>
 

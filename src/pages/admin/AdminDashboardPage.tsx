@@ -26,7 +26,9 @@ import {
   Zap,
   RefreshCw,
   Key,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Phone,
+  MessageCircle
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
@@ -84,6 +86,9 @@ export const AdminDashboardPage: React.FC = () => {
   const [telegramTesting, setTelegramTesting] = useState<boolean>(false);
   const [webhookSetting, setWebhookSetting] = useState<boolean>(false);
   const [copiedWebhook, setCopiedWebhook] = useState<boolean>(false);
+  const [tgPhoneSearch, setTgPhoneSearch] = useState<string>('');
+  const [copiedAllPhones, setCopiedAllPhones] = useState<boolean>(false);
+  const [copiedStudentPhone, setCopiedStudentPhone] = useState<string | null>(null);
 
   useEffect(() => {
     loadAllData();
@@ -362,6 +367,38 @@ export const AdminDashboardPage: React.FC = () => {
       setCopiedWebhook(true);
       setTimeout(() => setCopiedWebhook(false), 2000);
     }
+  };
+
+  const handleCopyAllStudentPhones = () => {
+    if (!telegramInfo?.connections?.length) return;
+    const phones = telegramInfo.connections
+      .map((c: any) => c.studentPhone)
+      .filter(Boolean)
+      .join(', ');
+    navigator.clipboard.writeText(phones);
+    setCopiedAllPhones(true);
+    setTimeout(() => setCopiedAllPhones(false), 2000);
+  };
+
+  const handleCopySinglePhone = (phone: string) => {
+    navigator.clipboard.writeText(phone);
+    setCopiedStudentPhone(phone);
+    setTimeout(() => setCopiedStudentPhone(null), 2000);
+  };
+
+  const handleExportPhonesCSV = () => {
+    if (!telegramInfo?.connections?.length) return;
+    const headers = 'اسم الطالب,رقم الهاتف,الشعبة,كود التفعيل,تاريخ التسجيل,معرف تيليجرام,الحالة\n';
+    const rows = telegramInfo.connections
+      .map((c: any) => `"${c.studentName || ''}","${c.studentPhone || ''}","${c.departmentName || ''}","${c.activationCode || ''}","${c.linkedAt || c.activatedAt || ''}","${c.telegramUsername || ''}","مسجل تلقائياً"`)
+      .join('\n');
+    const blob = new Blob(['\uFEFF' + headers + rows], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `student_bot_phones_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -1001,7 +1038,7 @@ export const AdminDashboardPage: React.FC = () => {
           )}
 
           {/* Quick Metrics */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-2 shadow-xs">
               <div className="flex items-center justify-between text-xs text-slate-500 font-bold">
                 <span>اسم البوت المسجل</span>
@@ -1034,14 +1071,27 @@ export const AdminDashboardPage: React.FC = () => {
 
             <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-2 shadow-xs">
               <div className="flex items-center justify-between text-xs text-slate-500 font-bold">
-                <span>الطلاب المربوطين</span>
+                <span>أرقام الطلاب المسجلة بالبوت</span>
+                <Phone className="w-4 h-4 text-sky-600" />
+              </div>
+              <p className="text-2xl font-black text-slate-900 font-mono">
+                {telegramInfo?.connections?.filter((c: any) => c.studentPhone)?.length || 0}
+              </p>
+              <span className="text-[11px] text-emerald-700 font-bold">
+                تسجيل تلقائي فور إدخال كود التفعيل ✅
+              </span>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-2 shadow-xs">
+              <div className="flex items-center justify-between text-xs text-slate-500 font-bold">
+                <span>الربط والتسليم الآلي</span>
                 <Users className="w-4 h-4 text-emerald-600" />
               </div>
-              <p className="text-2xl font-black text-slate-900">
+              <p className="text-2xl font-black text-slate-900 font-mono">
                 {telegramInfo?.linkedStudentsCount || 0}
               </p>
               <span className="text-[11px] text-slate-500 font-medium">
-                يصلهم إشعار فوري عند نشر أي محاضرة أو إعلان
+                تصلهم تنبيهات المحاضرات والملفات فوراً
               </span>
             </div>
           </div>
@@ -1269,56 +1319,201 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Connected Students Table */}
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xs">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          {/* Auto-Registered Student Phone Numbers in Bot Table */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-5 shadow-xs">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <Users className="w-5 h-5 text-emerald-600" />
-                  <span>الطلاب المتصلين بالبوت حالياً ({telegramInfo?.connections?.length || 0})</span>
-                </h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <Phone className="w-5 h-5 text-sky-600" />
+                    <span>سجل أرقام الطلاب المسجلين بالبوت تلقائياً ({telegramInfo?.connections?.length || 0})</span>
+                  </h3>
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold">
+                    تسجيل تلقائي عند تفعيل الاشتراك ✅
+                  </span>
+                </div>
                 <p className="text-xs text-slate-500 mt-1">
-                  قائمة بجميع الطلاب الذين قاموا بربط حساب تيليجرام بنجاح.
+                  يتم حفظ وتوثيق رقم هاتف كل طالب في البوت آلياً بمجرد إدخال كود التفعيل، وتصلهم المحاضرات والتنبيهات فوراً.
                 </p>
               </div>
+
+              {/* Action buttons: Copy all numbers & Export CSV */}
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCopyAllStudentPhones}
+                  className="px-3 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+                  title="نسخ جميع أرقام هواتف الطلاب المسجلين لإرسال رسائل جماعية"
+                >
+                  {copiedAllPhones ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                  <span>{copiedAllPhones ? 'تم نسخ جميع الأرقام!' : 'نسخ جميع أرقام المشتركين'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportPhonesCSV}
+                  className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+                  title="تصدير كملف Excel / CSV"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>تصدير CSV</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Search Filter for Student Phones */}
+            <div className="flex items-center gap-2 max-w-md">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-slate-400 absolute right-3 top-2.5" />
+                <input
+                  type="text"
+                  placeholder="ابحث بالاسم أو رقم الهاتف أو كود التفعيل..."
+                  value={tgPhoneSearch}
+                  onChange={(e) => setTgPhoneSearch(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl pr-9 pl-3 py-2 text-xs outline-none focus:border-sky-500 text-slate-800"
+                />
+              </div>
+              {tgPhoneSearch && (
+                <button
+                  type="button"
+                  onClick={() => setTgPhoneSearch('')}
+                  className="text-xs text-slate-500 hover:text-slate-800 px-2 py-1"
+                >
+                  مسح
+                </button>
+              )}
             </div>
 
             {telegramInfo?.connections && telegramInfo.connections.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-right border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-200 text-slate-500 font-bold">
+                    <tr className="border-b border-slate-200 text-slate-500 font-bold bg-slate-50/50">
                       <th className="py-2.5 px-3">اسم الطالب</th>
-                      <th className="py-2.5 px-3">رقم الهاتف</th>
+                      <th className="py-2.5 px-3">رقم الهاتف المسجل</th>
+                      <th className="py-2.5 px-3">الشعبة والفرقة</th>
+                      <th className="py-2.5 px-3">كود التفعيل</th>
+                      <th className="py-2.5 px-3">تاريخ التسجيل والتفعيل</th>
+                      <th className="py-2.5 px-3">حالة البوت</th>
                       <th className="py-2.5 px-3">معرف تيليجرام</th>
-                      <th className="py-2.5 px-3">تاريخ الربط</th>
-                      <th className="py-2.5 px-3">حالة الإرسال</th>
+                      <th className="py-2.5 px-3 text-center">إجراءات التواصل</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-slate-700">
-                    {telegramInfo.connections.map((c: any, idx: number) => (
-                      <tr key={idx} className="hover:bg-slate-50/60">
-                        <td className="py-3 px-3 font-bold text-slate-900">{c.studentName}</td>
-                        <td className="py-3 px-3 font-mono">{c.studentPhone}</td>
-                        <td className="py-3 px-3 font-mono text-sky-700 font-bold" dir="ltr">
-                          @{c.telegramUsername || 'مستخدم'}
-                        </td>
-                        <td className="py-3 px-3 text-slate-500">
-                          {c.linkedAt ? new Date(c.linkedAt).toLocaleDateString('ar-EG') : 'حديثاً'}
-                        </td>
-                        <td className="py-3 px-3">
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                            نشط (Delivered)
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
+                    {telegramInfo.connections
+                      .filter((c: any) => {
+                        if (!tgPhoneSearch.trim()) return true;
+                        const q = tgPhoneSearch.toLowerCase().trim();
+                        return (
+                          (c.studentName && c.studentName.toLowerCase().includes(q)) ||
+                          (c.studentPhone && c.studentPhone.includes(q)) ||
+                          (c.activationCode && c.activationCode.toLowerCase().includes(q)) ||
+                          (c.telegramUsername && c.telegramUsername.toLowerCase().includes(q))
+                        );
+                      })
+                      .map((c: any, idx: number) => (
+                        <tr key={idx} className="hover:bg-slate-50/70 transition">
+                          <td className="py-3 px-3">
+                            <div className="font-bold text-slate-900">{c.studentName}</div>
+                            <span className="text-[10px] text-slate-400 font-mono">{c.studentId}</span>
+                          </td>
+                          <td className="py-3 px-3 font-mono font-bold text-slate-900">
+                            <div className="flex items-center gap-1.5" dir="ltr">
+                              <span>{c.studentPhone || 'غير مدخل'}</span>
+                              {c.studentPhone && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopySinglePhone(c.studentPhone)}
+                                  className="p-1 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 cursor-pointer"
+                                  title="نسخ الرقم"
+                                >
+                                  {copiedStudentPhone === c.studentPhone ? (
+                                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                  ) : (
+                                    <Copy className="w-3.5 h-3.5" />
+                                  )}
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-3 text-slate-600">
+                            <div>{c.departmentName || 'نظم معلومات إدارية'}</div>
+                            <span className="text-[10px] text-slate-400">{c.academicYearName || 'الفرقة الثالثة'}</span>
+                          </td>
+                          <td className="py-3 px-3">
+                            {c.activationCode ? (
+                              <span className="font-mono bg-blue-50 text-blue-800 border border-blue-200 px-2 py-0.5 rounded text-[11px] font-bold">
+                                {c.activationCode}
+                              </span>
+                            ) : (
+                              <span className="text-slate-400">تفعيل مباشر</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-3 text-slate-500 whitespace-nowrap">
+                            {c.activatedAt || c.linkedAt ? (
+                              new Date(c.activatedAt || c.linkedAt).toLocaleDateString('ar-EG', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                              })
+                            ) : (
+                              'حديثاً'
+                            )}
+                          </td>
+                          <td className="py-3 px-3">
+                            <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold inline-flex items-center gap-1 whitespace-nowrap">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                              <span>مسجل تلقائياً ومفعّل</span>
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 font-mono text-sky-700 font-bold whitespace-nowrap" dir="ltr">
+                            {c.telegramUsername ? `@${c.telegramUsername}` : (
+                              <span className="text-slate-400 font-normal text-[11px]">في انتظار Start</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-3 text-center">
+                            <div className="flex items-center justify-center gap-1.5">
+                              {c.studentPhone && (
+                                <>
+                                  <a
+                                    href={`https://wa.me/20${c.studentPhone.replace(/^0+/, '')}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition"
+                                    title="مراسلة عبر واتساب"
+                                  >
+                                    <MessageCircle className="w-3.5 h-3.5" />
+                                  </a>
+                                  <a
+                                    href={`tel:${c.studentPhone}`}
+                                    className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
+                                    title="اتصال هاتفي"
+                                  >
+                                    <Phone className="w-3.5 h-3.5" />
+                                  </a>
+                                </>
+                              )}
+                              {c.telegramUsername && (
+                                <a
+                                  href={`https://t.me/${c.telegramUsername}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="p-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 transition"
+                                  title="فتح في تيليجرام"
+                                >
+                                  <Send className="w-3.5 h-3.5" />
+                                </a>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
             ) : (
               <div className="text-center py-8 text-xs text-slate-500 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                لا يوجد طلاب مربوطين حتى الآن. يمكن للطلاب فتح صفحة تيليجرام والربط بالضغط على Start.
+                لا يوجد طلاب مسجلين بالبوت حتى الآن. بمجرد تفعيل أي طالب لاشتراكه باستخدام كود تفعيل، سيظهر رقمه وبياناته هنا تلقائياً!
               </div>
             )}
           </div>

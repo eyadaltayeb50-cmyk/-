@@ -193,12 +193,20 @@ export interface NotificationPreferences {
 
 export interface TelegramConnection {
   studentId: string;
+  studentName?: string;
+  studentPhone?: string;
   telegramUserId?: string;
   telegramUsername?: string;
   isLinked: boolean;
   linkingToken?: string;
   tokenExpiresAt?: string;
   linkedAt?: string;
+  activatedAt?: string;
+  activationCode?: string;
+  planName?: string;
+  autoRegistered?: boolean;
+  academicYearName?: string;
+  departmentName?: string;
   lastDeliveryStatus?: 'delivered' | 'failed' | 'pending';
 }
 

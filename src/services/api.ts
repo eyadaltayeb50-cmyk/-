@@ -72,10 +72,19 @@ export const api = {
   },
 
   // Activation
-  async verifyCode(code: string): Promise<{ success: boolean; message: string; user: UserProfile; expiresAt: string }> {
+  async verifyCode(code: string, phone?: string): Promise<{ 
+    success: boolean; 
+    message: string; 
+    user: UserProfile; 
+    expiresAt: string;
+    telegramAutoRegistered?: boolean;
+    registeredPhone?: string;
+    botDeepLink?: string;
+    botUsername?: string;
+  }> {
     return fetchJSON('/api/activation/verify', {
       method: 'POST',
-      body: JSON.stringify({ code }),
+      body: JSON.stringify({ code, phone }),
     });
   },
 

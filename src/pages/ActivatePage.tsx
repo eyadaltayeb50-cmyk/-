@@ -9,7 +9,10 @@ import {
   Clock, 
   AlertTriangle,
   Zap,
-  GraduationCap
+  Phone,
+  Send,
+  Sparkles,
+  Bot
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useAuth } from '../context/AuthContext';
@@ -22,9 +25,15 @@ interface ActivatePageProps {
 export const ActivatePage: React.FC<ActivatePageProps> = ({ onSuccessNavigate }) => {
   const { user, isActivated, refreshUser } = useAuth();
   const [code, setCode] = useState('');
+  const [phone, setPhone] = useState(user?.phone || '01012345678');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [registeredBotData, setRegisteredBotData] = useState<{
+    phone: string;
+    botDeepLink?: string;
+    botUsername?: string;
+  } | null>(null);
   const [activeTab, setActiveTab] = useState<'activate' | 'payment'>('activate');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -41,28 +50,35 @@ export const ActivatePage: React.FC<ActivatePageProps> = ({ onSuccessNavigate })
       return;
     }
 
+    if (!phone.trim()) {
+      setError('يرجى إدخال رقم الهاتف للتسجيل في البوت');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setSuccessMessage(null);
+    setRegisteredBotData(null);
 
     try {
-      const res = await api.verifyCode(code.trim());
+      const res = await api.verifyCode(code.trim(), phone.trim());
       if (res.success) {
         setSuccessMessage(res.message);
+        setRegisteredBotData({
+          phone: res.registeredPhone || phone.trim(),
+          botDeepLink: res.botDeepLink,
+          botUsername: res.botUsername,
+        });
         setCode('');
         await refreshUser();
 
         // Trigger celebratory confetti
         confetti({
-          particleCount: 100,
-          spread: 70,
+          particleCount: 120,
+          spread: 80,
           origin: { y: 0.6 },
-          colors: ['#2563eb', '#0d9488', '#8b5cf6', '#f59e0b'],
+          colors: ['#2563eb', '#0d9488', '#8b5cf6', '#f59e0b', '#10b981'],
         });
-
-        if (onSuccessNavigate) {
-          setTimeout(onSuccessNavigate, 2000);
-        }
       }
     } catch (err: any) {
       setError(err.message || 'فشل تفعيل الكود، يرجى المحاولة لاحقاً');
@@ -171,7 +187,68 @@ export const ActivatePage: React.FC<ActivatePageProps> = ({ onSuccessNavigate })
               </div>
             )}
 
-            {successMessage && (
+            {/* Telegram Bot Automated Registration Result Card */}
+            {registeredBotData && (
+              <div className="p-6 rounded-3xl bg-gradient-to-br from-emerald-50 via-teal-50 to-sky-50 border-2 border-emerald-300 shadow-md space-y-4 animate-in fade-in">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-black shadow-sm">
+                    <Sparkles className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full inline-block mb-1">
+                      تأكيد التسجيل الفوري في البوت ✅
+                    </span>
+                    <h3 className="text-base sm:text-lg font-black text-slate-900">
+                      تم تفعيل الاشتراك وتسجيل رقمك بالبوت تلقائياً!
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white border border-emerald-200 space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-600 font-semibold">رقم الهاتف المسجل بالبوت:</span>
+                    <span className="font-mono text-emerald-800 font-black text-sm" dir="ltr">
+                      {registeredBotData.phone}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-600 font-semibold">حالة الربط والإشعارات:</span>
+                    <span className="text-emerald-700 font-bold">نشط ومسجل بقاعدة بيانات البوت تلقائياً ✅</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-600 font-semibold">معرف بوت معهد الفراعنة:</span>
+                    <span className="font-mono text-sky-700 font-bold" dir="ltr">
+                      @{registeredBotData.botUsername || 'SmartCampusEgyptBot'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
+                  {registeredBotData.botDeepLink && (
+                    <a
+                      href={registeredBotData.botDeepLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 py-3 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-xs text-center"
+                    >
+                      <Send className="w-4 h-4" />
+                      <span>فتح البوت على Telegram وتأكيد الاستلام 🚀</span>
+                    </a>
+                  )}
+                  {onSuccessNavigate && (
+                    <button
+                      type="button"
+                      onClick={onSuccessNavigate}
+                      className="py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition cursor-pointer text-center"
+                    >
+                      الانتقال للمحاضرات الآن
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {successMessage && !registeredBotData && (
               <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
                 <div className="leading-relaxed font-bold">{successMessage}</div>
@@ -194,6 +271,34 @@ export const ActivatePage: React.FC<ActivatePageProps> = ({ onSuccessNavigate })
                     disabled={loading}
                   />
                 </div>
+              </div>
+
+              {/* Automated Bot Phone Number Input */}
+              <div className="p-4 rounded-2xl bg-sky-50/60 border border-sky-200 space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-sky-600" />
+                    <span>رقم الهاتف المحمول (يُسجل في البوت تلقائياً)</span>
+                  </label>
+                  <span className="text-[10px] font-bold text-sky-800 bg-sky-100 px-2 py-0.5 rounded-full flex items-center gap-1 w-fit">
+                    <Bot className="w-3 h-3 text-sky-600" />
+                    <span>تسجيل تلقائي في البوت 🤖</span>
+                  </span>
+                </div>
+                
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="010xxxxxxxx"
+                  dir="ltr"
+                  className="w-full bg-white border border-sky-300 focus:border-sky-600 focus:ring-2 focus:ring-sky-100 rounded-xl px-3.5 py-2.5 text-center text-sm font-mono font-bold text-slate-900 transition outline-none"
+                  disabled={loading}
+                />
+
+                <p className="text-[11px] text-sky-900/80 leading-relaxed font-medium">
+                  ⚡ بمجرد تفعيل الاشتراك، سيتم تسجيل رقمك تلقائياً في بوت تيليجرام معهد الفراعنة لتصلك المحاضرات والملخصات والروابط أولاً بأول.
+                </p>
               </div>
 
               {/* Sample test codes */}

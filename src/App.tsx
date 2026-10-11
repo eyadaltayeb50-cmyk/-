@@ -107,6 +107,38 @@ function MainApp() {
             <AuthPage onSuccess={() => setShowAuthModal(false)} />
           ) : (
             <>
+              {/* Clear Student Breadcrumb & Orientation Bar */}
+              {activeTab !== 'home' && activeTab !== 'admin' && (
+                <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-slate-200/90 rounded-2xl px-5 py-3.5 shadow-2xs">
+                  <div className="flex items-center gap-2 text-xs">
+                    <button
+                      onClick={() => handleNavigate('home')}
+                      className="font-bold text-blue-600 hover:text-blue-800 transition cursor-pointer flex items-center gap-1"
+                    >
+                      <span>الرئيسية</span>
+                    </button>
+                    <span className="text-slate-300">/</span>
+                    <span className="font-extrabold text-slate-800">
+                      {activeTab === 'subjects' ? 'المواد والمحاضرات (Google Drive)' :
+                       activeTab === 'schedule' ? 'جدول المواعيد والمحاضرات' :
+                       activeTab === 'announcements' ? 'لوحة الإعلانات الرسمية' :
+                       activeTab === 'notifications' ? 'مركز الإشعارات' :
+                       activeTab === 'activate' ? 'تفعيل الحساب والاشتراك' :
+                       activeTab === 'telegram' ? 'إشعارات بوت تيليجرام' :
+                       activeTab === 'onboarding' ? 'تحديد المواد والدكاترة' :
+                       activeTab === 'settings' ? 'الملف الشخصي والإعدادات' : activeTab}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => handleNavigate('home')}
+                    className="self-start sm:self-auto text-xs font-bold px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer flex items-center gap-1.5"
+                  >
+                    <span>الرجوع للرئيسية ↩</span>
+                  </button>
+                </div>
+              )}
+
               {activeTab === 'home' && (
                 <HomePage onNavigateTab={handleNavigate} />
               )}

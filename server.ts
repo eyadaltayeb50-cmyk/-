@@ -583,18 +583,34 @@ const initialData: DatabaseState = {
   telegramConnections: [
     {
       studentId: 'student-active-1',
+      studentName: 'أحمد محمود حسن',
+      studentPhone: '01012345678',
       telegramUserId: '987654321',
       telegramUsername: 'AhmedStudent_Eg',
       isLinked: true,
       linkedAt: '2026-10-05T12:30:00Z',
+      activatedAt: '2026-10-05T12:00:00Z',
+      activationCode: 'CAMPUS-2026-TERM',
+      planName: 'ترم كامل (Term)',
+      autoRegistered: true,
+      academicYearName: 'الفرقة الثالثة',
+      departmentName: 'شعبة نظم معلومات إدارية (MIS)',
       lastDeliveryStatus: 'delivered',
     },
     {
       studentId: 'admin-1',
+      studentName: 'د. كريم عبد العزيز',
+      studentPhone: '01099887766',
       telegramUserId: '123456789',
       telegramUsername: 'KarimAdmin',
       isLinked: true,
       linkedAt: '2026-09-02T10:00:00Z',
+      activatedAt: '2026-09-02T10:00:00Z',
+      activationCode: 'ADMIN-MASTER-PASS',
+      planName: 'دائم (Permanent)',
+      autoRegistered: true,
+      academicYearName: 'هيئة التدريس والإدارة',
+      departmentName: 'عمادة وإدارة المعهد',
       lastDeliveryStatus: 'delivered',
     },
   ],
@@ -893,12 +909,54 @@ app.post('/api/activation/verify', (req: Request, res: Response) => {
   };
   db.subscriptions.push(subRecord);
 
-  // 3. Update User Status to Active
+  // 3. Update User Status to Active, Phone, and mark Telegram Linked
+  const rawPhone = (req.body.phone || user.phone || '01012345678').trim();
   const userIdx = db.users.findIndex((u) => u.id === user.id);
   if (userIdx !== -1) {
     db.users[userIdx].status = 'active';
     db.users[userIdx].subscriptionExpiresAt = newExpiry.toISOString();
+    if (rawPhone) {
+      db.users[userIdx].phone = rawPhone;
+    }
+    db.users[userIdx].telegramLinked = true;
   }
+
+  // 4. AUTOMATIC TELEGRAM BOT REGISTRATION:
+  // Register the student's phone number and subscription into the Bot database immediately
+  const connIdx = db.telegramConnections.findIndex((t) => t.studentId === user.id);
+  const existingConn = connIdx !== -1 ? db.telegramConnections[connIdx] : null;
+
+  const botConnectionData = {
+    studentId: user.id,
+    studentName: user.fullName,
+    studentPhone: rawPhone,
+    isLinked: true,
+    telegramUserId: existingConn?.telegramUserId || null,
+    telegramUsername: existingConn?.telegramUsername || null,
+    activationCode: codeRecord.code,
+    planName: codeRecord.planName || codeRecord.planId,
+    activatedAt: new Date().toISOString(),
+    linkedAt: existingConn?.linkedAt || new Date().toISOString(),
+    lastDeliveryStatus: 'delivered' as const,
+    autoRegistered: true,
+    academicYearName: user.academicYearName || 'الفرقة الثالثة',
+    departmentName: user.departmentName || 'شعبة نظم معلومات إدارية (MIS)',
+  };
+
+  if (connIdx !== -1) {
+    db.telegramConnections[connIdx] = {
+      ...db.telegramConnections[connIdx],
+      ...botConnectionData,
+    };
+  } else {
+    db.telegramConnections.push(botConnectionData);
+  }
+
+  // Generate deep-link for instant bot start
+  const linkToken = `act_${Math.random().toString(36).substring(2, 9)}_${user.id}`;
+  activeLinkingTokens.set(linkToken, { studentId: user.id, expiresAt: Date.now() + 60 * 60 * 1000 });
+  const botUsername = getTelegramBotUsername();
+  const botDeepLink = `https://t.me/${botUsername}?start=${linkToken}`;
 
   // Reset rate limiting counter on success
   codeAttempts.delete(user.id);
@@ -907,8 +965,8 @@ app.post('/api/activation/verify', (req: Request, res: Response) => {
   // Create in-app activation celebration notification
   const notif = {
     id: `notif-act-${Date.now()}`,
-    title: '🎉 تهانينا! تم تفعيل حسابك بنجاح',
-    content: `تم تفعيل اشتراكك في المنصة بنجاح حتى ${newExpiry.toLocaleDateString('ar-EG')}. استمتع بجميع المحاضرات والملخصات.`,
+    title: '🎉 تهانينا! تم تفعيل حسابك وتسجيل رقمك بالبوت تلقائياً',
+    content: `تم تفعيل اشتراكك في المنصة حتى ${newExpiry.toLocaleDateString('ar-EG')}، وتم تسجيل رقم هاتفك (${rawPhone}) تلقائياً في بوت تيليجرام المعهد لإرسال المحاضرات والتنبيهات.`,
     type: 'subscription_alert',
     targetUrl: '/subjects',
     createdAt: new Date().toISOString(),
@@ -921,11 +979,37 @@ app.post('/api/activation/verify', (req: Request, res: Response) => {
     isRead: false,
   });
 
+  // Automated Telegram Bot Dispatch (if Bot Token is present)
+  try {
+    // If student already has linked Telegram account, send them immediate confirmation
+    if (existingConn?.telegramUserId) {
+      const studentMsg = `🎉 <b>ألف مبروك يا ${user.fullName}!</b>\n\n🏛️ <b>معهد الفراعنة العالي للحاسب ونظم المعلومات</b>\nتم تفعيل اشتراكك بنجاح حتى <b>${newExpiry.toLocaleDateString('ar-EG')}</b>.\n📱 <b>رقم الهاتف المسجل:</b> <code>${rawPhone}</code>\n✅ تم تسجيل رقمك في البوت تلقائياً وستصلك جميع المحاضرات والملخصات فور نشرها.`;
+      sendTelegramMessage(existingConn.telegramUserId, studentMsg);
+    }
+
+    // Notify connected Admins on Telegram about the new activation and registered phone
+    const adminRecipients = db.telegramConnections.filter(
+      (t) => t.isLinked && t.telegramUserId && (t.studentId.includes('admin') || db.users.find((u) => u.id === t.studentId)?.role.includes('admin'))
+    );
+    const adminAlertText = `🔔 <b>تفعيل اشتراك جديد وتسجيل رقم بالبوت تلقائياً!</b>\n🏛️ <b>معهد الفراعنة العالي</b>\n\n👤 <b>الطالب:</b> ${user.fullName}\n📱 <b>رقم الهاتف المسجل:</b> <code>${rawPhone}</code>\n📚 <b>الشعبة:</b> ${user.departmentName || 'نظم معلومات إدارية'}\n🔑 <b>كود التفعيل:</b> <code>${codeRecord.code}</code>\n📅 <b>صلاحية الاشتراك حتى:</b> ${newExpiry.toLocaleDateString('ar-EG')}\n🤖 <b>حالة البوت:</b> تم تسجيل رقم الهاتف في قاعدة بيانات البوت بنجاح`;
+    for (const adm of adminRecipients) {
+      if (adm.telegramUserId) {
+        sendTelegramMessage(adm.telegramUserId, adminAlertText);
+      }
+    }
+  } catch (tgErr) {
+    console.error('Error dispatching telegram activation message:', tgErr);
+  }
+
   res.json({
     success: true,
-    message: 'تم تفعيل حسابك بنجاح! مرحباً بك في الحرم الذكي.',
+    message: `تم تفعيل حسابك بنجاح وتسجيل رقم هاتفك (${rawPhone}) في بوت تيليجرام تلقائياً!`,
     expiresAt: newExpiry.toISOString(),
     user: getCurrentUser(),
+    telegramAutoRegistered: true,
+    registeredPhone: rawPhone,
+    botDeepLink,
+    botUsername,
   });
 });
 
@@ -1380,36 +1464,82 @@ app.post('/api/telegram/simulate-bot-link', (req: Request, res: Response) => {
 app.post('/api/telegram/webhook', async (req: Request, res: Response) => {
   try {
     const update = req.body;
-    if (update?.message?.text && update.message.text.startsWith('/start link_')) {
-      const token = update.message.text.replace('/start ', '').trim();
-      const tokenInfo = activeLinkingTokens.get(token);
+    const msg = update?.message;
 
-      if (tokenInfo && tokenInfo.expiresAt >= Date.now()) {
-        activeLinkingTokens.delete(token);
-        const studentId = tokenInfo.studentId;
-        const tgUser = update.message.from;
+    // A. Student shared Contact (Phone Number)
+    if (msg?.contact) {
+      const contactPhone = (msg.contact.phone_number || '').replace(/\D/g, '');
+      const tgUser = msg.from;
+      // Match student by phone number (last 9 digits match for Egyptian mobile prefixes)
+      const student = db.users.find(
+        (u) => u.phone && u.phone.replace(/\D/g, '').endsWith(contactPhone.slice(-9))
+      );
 
-        const connIndex = db.telegramConnections.findIndex((t) => t.studentId === studentId);
+      if (student) {
+        const connIndex = db.telegramConnections.findIndex((t) => t.studentId === student.id);
         const record = {
-          studentId,
+          studentId: student.id,
+          studentName: student.fullName,
+          studentPhone: student.phone,
           telegramUserId: tgUser.id.toString(),
           telegramUsername: tgUser.username || tgUser.first_name,
           isLinked: true,
           linkedAt: new Date().toISOString(),
           lastDeliveryStatus: 'delivered' as const,
+          autoRegistered: true,
         };
 
         if (connIndex !== -1) {
-          db.telegramConnections[connIndex] = record;
+          db.telegramConnections[connIndex] = { ...db.telegramConnections[connIndex], ...record };
         } else {
           db.telegramConnections.push(record);
         }
         persistDB();
 
-        // If real bot token is present, send welcome message back to telegram user
-        const welcomeText = `🎉 <b>مرحباً بك يا ${tgUser.first_name || 'طالبنا العزيز'}!</b>\n\n🏛️ <b>معهد الفراعنة العالي للحاسب ونظم المعلومات</b>\nتم ربط حسابك بمنصة <b>Smart Campus</b> بنجاح!\n\nستصلك إشعارات المحاضرات والمقررات والملفات والمواعيد الهامة فور نشرها هنا مباشرة.`;
+        const reply = `✅ <b>تم التحقق وتأكيد رقمك بنجاح!</b>\n\n🏛️ <b>معهد الفراعنة العالي للحاسب ونظم المعلومات</b>\n👤 <b>الطالب:</b> ${student.fullName}\n📱 <b>رقم الهاتف:</b> <code>${student.phone}</code>\n\nتم ربط حسابك بالبوت، وستصلك إشعارات المحاضرات والملفات الدراسية فور نشرها.`;
+        await sendTelegramMessage(tgUser.id, reply);
+      }
+    }
+
+    // B. /start deep-link tokens (link_ or act_)
+    if (msg?.text && (msg.text.startsWith('/start link_') || msg.text.startsWith('/start act_'))) {
+      const token = msg.text.replace('/start ', '').trim();
+      const tokenInfo = activeLinkingTokens.get(token);
+
+      if (tokenInfo && tokenInfo.expiresAt >= Date.now()) {
+        activeLinkingTokens.delete(token);
+        const studentId = tokenInfo.studentId;
+        const tgUser = msg.from;
+        const student = db.users.find((u) => u.id === studentId);
+
+        const connIndex = db.telegramConnections.findIndex((t) => t.studentId === studentId);
+        const record = {
+          studentId,
+          studentName: student?.fullName || 'طالب',
+          studentPhone: student?.phone || '',
+          telegramUserId: tgUser.id.toString(),
+          telegramUsername: tgUser.username || tgUser.first_name,
+          isLinked: true,
+          linkedAt: new Date().toISOString(),
+          lastDeliveryStatus: 'delivered' as const,
+          autoRegistered: true,
+        };
+
+        if (connIndex !== -1) {
+          db.telegramConnections[connIndex] = { ...db.telegramConnections[connIndex], ...record };
+        } else {
+          db.telegramConnections.push(record);
+        }
+        persistDB();
+
+        // Send confirmation back to Telegram user
+        const welcomeText = `🎉 <b>مرحباً بك يا ${student?.fullName || tgUser.first_name}!</b>\n\n🏛️ <b>معهد الفراعنة العالي للحاسب ونظم المعلومات</b>\n📱 تم تأكيد تسجيل رقم هاتفك (<code>${student?.phone || 'المسجل بالنظام'}</code>) في البوت تلقائياً!\n\nحسابك الآن نشط ومربوط بالكامل. ستصلك إشعارات المحاضرات، روابط Google Drive، والجداول فور نشرها مباشرة.`;
         await sendTelegramMessage(tgUser.id, welcomeText);
       }
+    } else if (msg?.text === '/start') {
+      const tgUser = msg.from;
+      const welcomeGeneral = `👋 <b>أهلاً بك في بوت معهد الفراعنة العالي (Smart Campus)</b>\n\nإذا كنت طالباً وقمت بتفعيل اشتراكك في المنصة، سيتم تسجيل رقم هاتفك وربطه بالبوت تلقائياً.\nيمكنك الضغط على زر <b>ربط البوت</b> داخل المنصة لتأكيد وصول الإشعارات فوراً.`;
+      await sendTelegramMessage(tgUser.id, welcomeGeneral);
     }
   } catch (err) {
     console.error('Telegram webhook error:', err);
@@ -1811,16 +1941,25 @@ app.get('/api/admin/telegram/info', requireAdmin, async (req: Request, res: Resp
     botDetails,
     webhookDetails,
     suggestedWebhookUrl,
-    linkedStudentsCount: db.telegramConnections.filter((t) => t.isLinked).length,
-    connections: db.telegramConnections.filter((t) => t.isLinked).map((c) => {
+    linkedStudentsCount: db.telegramConnections.length,
+    autoRegisteredCount: db.telegramConnections.filter((t) => t.autoRegistered).length,
+    connections: db.telegramConnections.map((c) => {
       const st = db.users.find((u) => u.id === c.studentId);
       return {
         studentId: c.studentId,
-        studentName: st?.fullName || 'طالب',
-        studentPhone: st?.phone || '',
-        telegramUsername: c.telegramUsername,
-        linkedAt: c.linkedAt,
-        status: c.lastDeliveryStatus,
+        studentName: c.studentName || st?.fullName || 'طالب',
+        studentPhone: c.studentPhone || st?.phone || '',
+        telegramUsername: c.telegramUsername || null,
+        telegramUserId: c.telegramUserId || null,
+        isLinked: Boolean(c.isLinked),
+        linkedAt: c.linkedAt || c.activatedAt,
+        activatedAt: c.activatedAt,
+        activationCode: c.activationCode,
+        planName: c.planName,
+        academicYearName: c.academicYearName || st?.academicYearName || 'الفرقة الثالثة',
+        departmentName: c.departmentName || st?.departmentName || 'نظم معلومات إدارية',
+        autoRegistered: Boolean(c.autoRegistered),
+        status: c.lastDeliveryStatus || 'delivered',
       };
     }),
   });

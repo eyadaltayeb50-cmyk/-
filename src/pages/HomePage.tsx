@@ -227,6 +227,133 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateTab }) => {
         </div>
       </div>
 
+      {/* 4 Core Pillars - Crystal Clear Navigation so student NEVER gets lost */}
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-7 shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div>
+            <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <span className="text-lg">🧭</span>
+              <span>خريطة المنصة السريعة (ابدأ من هنا)</span>
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              كل ما تحتاجه في مكان واحد مقسم بخطوات واضحة ومباشرة:
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {/* Card 1: المحاضرات وملفات Drive */}
+          <div
+            onClick={() => onNavigateTab('subjects')}
+            className="group p-4 rounded-2xl bg-gradient-to-br from-blue-50/70 to-indigo-50/30 border border-blue-200/80 hover:border-blue-400 hover:shadow-sm transition cursor-pointer flex flex-col justify-between space-y-3"
+          >
+            <div className="flex items-start justify-between">
+              <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-xs">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                {stats.enrolledSubjectsCount} مواد مسجلة
+              </span>
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 group-hover:text-blue-700 transition">
+                1. المواد والمحاضرات
+              </h3>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                ملفات Google Drive، مذكرات الـ PDF، وسلايدات الدكاترة.
+              </p>
+            </div>
+            <div className="pt-2 border-t border-blue-100/60 flex items-center justify-between text-xs font-bold text-blue-700">
+              <span>دخول المقررات</span>
+              <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            </div>
+          </div>
+
+          {/* Card 2: جدول المواعيد والسكاشن */}
+          <div
+            onClick={() => onNavigateTab('schedule')}
+            className="group p-4 rounded-2xl bg-gradient-to-br from-purple-50/70 to-pink-50/30 border border-purple-200/80 hover:border-purple-400 hover:shadow-sm transition cursor-pointer flex flex-col justify-between space-y-3"
+          >
+            <div className="flex items-start justify-between">
+              <div className="w-10 h-10 rounded-xl bg-purple-700 text-white flex items-center justify-center font-bold shadow-xs">
+                <Calendar className="w-5 h-5" />
+              </div>
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">
+                توقيت القاهرة
+              </span>
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 group-hover:text-purple-700 transition">
+                2. جدول المواعيد
+              </h3>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                مواعيد المحاضرات الأسبوعية، السكاشن، والامتحانات.
+              </p>
+            </div>
+            <div className="pt-2 border-t border-purple-100/60 flex items-center justify-between text-xs font-bold text-purple-700">
+              <span>عرض الجدول</span>
+              <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            </div>
+          </div>
+
+          {/* Card 3: إعلانات المعهد الرسمية */}
+          <div
+            onClick={() => onNavigateTab('announcements')}
+            className="group p-4 rounded-2xl bg-gradient-to-br from-amber-50/70 to-orange-50/30 border border-amber-200/80 hover:border-amber-400 hover:shadow-sm transition cursor-pointer flex flex-col justify-between space-y-3"
+          >
+            <div className="flex items-start justify-between">
+              <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold shadow-xs">
+                <Megaphone className="w-5 h-5" />
+              </div>
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900">
+                {announcements.length} تنبيهات
+              </span>
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 group-hover:text-amber-800 transition">
+                3. لوحة الإعلانات
+              </h3>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                قرارات إدارة معهد الفراعنة وجداول الامتحانات والنتائج.
+              </p>
+            </div>
+            <div className="pt-2 border-t border-amber-100/60 flex items-center justify-between text-xs font-bold text-amber-800">
+              <span>قراءة الإعلانات</span>
+              <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            </div>
+          </div>
+
+          {/* Card 4: إشعارات بوت تيليجرام */}
+          <div
+            onClick={() => onNavigateTab('telegram')}
+            className="group p-4 rounded-2xl bg-gradient-to-br from-sky-50/70 to-cyan-50/30 border border-sky-200/80 hover:border-sky-400 hover:shadow-sm transition cursor-pointer flex flex-col justify-between space-y-3"
+          >
+            <div className="flex items-start justify-between">
+              <div className="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center font-bold shadow-xs">
+                <Send className="w-5 h-5" />
+              </div>
+              <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                user?.telegramLinked ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
+              }`}>
+                {user?.telegramLinked ? '✅ مربوط' : 'اضغط للربط'}
+              </span>
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 group-hover:text-sky-700 transition">
+                4. إشعارات تيليجرام
+              </h3>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                تصلك أي محاضرة جديدة فور نشرها على تيليجرام مباشرة.
+              </p>
+            </div>
+            <div className="pt-2 border-t border-sky-100/60 flex items-center justify-between text-xs font-bold text-sky-700">
+              <span>{user?.telegramLinked ? 'حالة البوت' : 'ربط البوت الآن'}</span>
+              <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Main Grid: Recent Lectures & Upcoming Schedule */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 

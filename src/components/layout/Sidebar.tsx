@@ -49,21 +49,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const studentSections: NavSection[] = [
     {
-      title: 'بوابة الطالب',
+      title: '📚 المحتوى والدراسة',
       items: [
-        { id: 'home', label: 'الرئيسية', icon: Home },
-        { id: 'subjects', label: 'المواد والمحاضرات', icon: BookOpen },
-        { id: 'schedule', label: 'المواعيد والتقويم', icon: Calendar },
-        { id: 'announcements', label: 'لوحة الإعلانات', icon: Megaphone },
-        { id: 'onboarding', label: 'اختيار المواد والدكاترة', icon: Layers },
+        { id: 'home', label: 'الرئيسية (لوحة التحكم)', icon: Home },
+        { id: 'subjects', label: 'المواد والمحاضرات (Drive)', icon: BookOpen },
+        { id: 'schedule', label: 'جدول المواعيد والمحاضرات', icon: Calendar },
+        { id: 'onboarding', label: 'تحديد المواد والدكاترة', icon: Layers },
       ],
     },
     {
-      title: 'التكامل والاشتراك',
+      title: '🔔 الإشعارات والتواصل',
       items: [
-        { id: 'activate', label: 'تفعيل الاشتراك', icon: KeyRound, badge: !isActivated && !isAdmin ? 'مطلوب' : undefined },
-        { id: 'telegram', label: 'بوت تيليجرام', icon: Send, highlight: user?.telegramLinked ? 'متصل' : 'غير متصل' },
-        { id: 'settings', label: 'الملف والإشعارات', icon: Settings },
+        { id: 'announcements', label: 'لوحة الإعلانات الرسمية', icon: Megaphone },
+        { id: 'telegram', label: 'إشعارات بوت تيليجرام', icon: Send, highlight: user?.telegramLinked ? 'متصل' : 'اضغط للربط' },
+      ],
+    },
+    {
+      title: '👤 الحساب والاشتراك',
+      items: [
+        { id: 'activate', label: 'تفعيل الحساب والاشتراك', icon: KeyRound, badge: !isActivated && !isAdmin ? 'مطلوب تفعيله' : 'مفعّل ✅' },
+        { id: 'settings', label: 'الملف الشخصي والإعدادات', icon: Settings },
       ],
     },
   ];
