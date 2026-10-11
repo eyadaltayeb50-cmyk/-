@@ -1,4 +1,4 @@
-export type UserRole = 'student' | 'admin' | 'super_admin' | 'content_manager';
+export type UserRole = 'student' | 'admin' | 'super_admin' | 'content_manager' | 'support_manager' | 'finance_manager' | 'staff_manager';
 
 export type AccountStatus = 'pending_activation' | 'active' | 'expired' | 'suspended' | 'banned';
 
@@ -45,7 +45,7 @@ export interface Department {
 export interface AcademicYear {
   id: string;
   departmentId: string;
-  name: string; // e.g. "الفرقة الأولى"
+  name: string;
   yearNumber: number;
   term: 'first' | 'second' | 'full';
   isActive: boolean;
@@ -54,7 +54,7 @@ export interface AcademicYear {
 export interface Professor {
   id: string;
   name: string;
-  title: string; // e.g. "أ.د.", "د."
+  title: string;
   bio?: string;
   avatarUrl?: string;
   email?: string;
@@ -131,9 +131,9 @@ export interface CampusEvent {
   title: string;
   description?: string;
   eventType: EventType;
-  eventDate: string; // YYYY-MM-DD
-  startTime: string; // HH:mm
-  endTime: string; // HH:mm
+  eventDate: string;
+  startTime: string;
+  endTime: string;
   locationOrLink?: string;
   targetType: TargetType;
   targetId?: string;
@@ -188,7 +188,7 @@ export interface NotificationPreferences {
   subscriptionsEnabled: boolean;
   telegramEnabled: boolean;
   webPushEnabled: boolean;
-  subjectOverrides: Record<string, boolean>; // subjectId -> boolean
+  subjectOverrides: Record<string, boolean>;
 }
 
 export interface TelegramConnection {
@@ -255,4 +255,22 @@ export interface AdminStats {
   usedCodesCount: number;
   sentNotificationsCount: number;
   failedNotificationsCount: number;
+}
+
+export interface StaffPermission {
+  id: string;
+  label: string;
+  enabled: boolean;
+}
+
+export interface StaffMember {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  role: UserRole;
+  department: string;
+  joinedAt: string;
+  permissions: StaffPermission[];
+  status: 'active' | 'inactive';
 }
